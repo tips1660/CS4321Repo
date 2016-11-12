@@ -36,9 +36,17 @@ public class parserTest {
 
 	public static void main(String[] args) throws IOException {
 // in the readme write that this is hard coded, and that externalsortoperator works, but not with smj. Also we cannot delete files on some computers
-		File input = new File(args[0]);
-		File output = new File(args[1]);
-		File temp = new File(args[2]);
+		
+		File config = new File(args[0]);
+		FileReader cReader = new FileReader(config);
+		BufferedReader configReader = new BufferedReader(cReader);
+		
+		File input = new File(configReader.readLine());
+		File output = new File(configReader.readLine());
+		File temp = new File(configReader.readLine());
+		int buildIndex = Integer.parseInt(configReader.readLine());
+		int evaluateQueries = Integer.parseInt(configReader.readLine());
+	
 
 		File[] inputDir = input.listFiles();
 		File[] data = inputDir[1].listFiles();
