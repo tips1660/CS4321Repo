@@ -30,7 +30,7 @@ import net.sf.jsqlparser.statement.select.OrderByElement;
 public class parserTest {
 
 	private static String queriesFile = "queries.sql";
-	private static File configFile;
+	private static File pbconfigFile;
 	static ExpressionTester  k = new ExpressionTester();
 
 
@@ -51,11 +51,13 @@ public class parserTest {
 		File[] inputDir = input.listFiles();
 		File[] data = inputDir[1].listFiles();
 		
-		configFile = inputDir[2];
+		//Process plan_builder_config.txt
+		pbconfigFile = inputDir[2];
 		System.out.println(temp.getAbsolutePath());
-		FileReader f = new FileReader(configFile);
+		FileReader f = new FileReader(pbconfigFile);
 		BufferedReader b = new BufferedReader(f);
-		String sortLine= "";
+		
+		String sortLine = "";
 		String joinLine ="";
 		joinLine = b.readLine();
 		sortLine = b.readLine();
@@ -65,22 +67,46 @@ public class parserTest {
 		int joinBuffer = 0;
 		
 		sortType = Integer.parseInt(sortLine.substring(0, 1));
-		if (sortType == 1)
-			sortBuffer = Integer.parseInt(sortLine.substring(2, sortLine.length()));
+		if (sortType == 1) sortBuffer = Integer.parseInt(sortLine.substring(2, sortLine.length()));
 		
 		joinType = Integer.parseInt(joinLine.substring(0, 1));
-		if (joinType == 1)
-			joinBuffer = Integer.parseInt(joinLine.substring(2, joinLine.length()));
-		queriesFile= inputDir[3].getAbsolutePath();
+		if (joinType == 1) joinBuffer = Integer.parseInt(joinLine.substring(2, joinLine.length()));
+		
+		//Flag to specify whether PPB should use indexes for selection
+		int useIndexes = Integer.parseInt(b.readLine());
+		
+		
+		queriesFile = inputDir[3].getAbsolutePath();
 		File[] tables = data[1].listFiles();
-		File schema = data[2];
-		System.out.println(schema.getAbsolutePath());
+		File index_info = data[2];
+		File[] indexes = data[3].listFiles();
+		File schema = data[4];
+		
+		//System.out.println(schema.getAbsolutePath());
 
 		DatabaseCatalog dbcat = DatabaseCatalog.getInstance();	
 		dbcat.setSchemaName(schema);
 		dbcat.setTableLocation(tables);
 		dbcat.setInputDirectory(input.getPath());
+		dbcat.setIndexesDirectory(indexes);
 		dbcat.startParseSchema();
+		
+		//Feed each line of index_info.txt into new bulk loading B+ tree class
+		BufferedReader indexReader = new BufferedReader(new FileReader(index_info));
+		String index_line = "";
+		
+		while ((index_line = indexReader.readLine()) != null ){
+			String[] split_line = index_line.split(" ");
+			String table = split_line[0];
+			String attribute = split_line[1];
+			int clustered = Integer.parseInt(split_line[2]);
+			int order = Integer.parseInt(split_line[3]);
+			
+			//Use these four values as arguments to construct your new B+ tree
+			//Make sure that buildIndex outputs final trees into input/db/indexes/
+			//buildIndex(table,attribute,clustered,order);
+		
+		}
 
 
 		int counter = 1;

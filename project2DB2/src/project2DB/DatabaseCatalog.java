@@ -15,6 +15,7 @@ public final class DatabaseCatalog {
 	private Hashtable<String, tableProperties> tableMatcher = new Hashtable<String, tableProperties>();
 	static File schemaName;
 	static File[] tableLocations;
+	static File[] indexes;
 	static String inputDirectory = "";
 
 
@@ -136,6 +137,11 @@ public final class DatabaseCatalog {
 			tableMatcher.put(tableName, table);
 		}
 		scan.close();
+	}
+
+	public void setIndexesDirectory(File[] idx) 
+	{
+		indexes = idx;
 	}
 }
 
