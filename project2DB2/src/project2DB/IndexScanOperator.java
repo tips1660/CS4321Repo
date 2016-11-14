@@ -40,8 +40,27 @@ public class IndexScanOperator extends Operator {
 	
 	@Override
 	public Tuple getNextTuple() {
-		// TODO Auto-generated method stub
+		
+		/*
+		If the index is unclustered, each call must examine the current data entry, 
+		find the next rid, resolve that rid to a page and a tuple within the data file, 
+		retrieve the tuple from the data file, and return it. If the index is clustered, 
+		you must scan the (sorted) data file itself sequentially rather than going through 
+		the index for each tuple. Thus you don’t need to scan any index pages after the 
+		initial root-to-leaf descent that gives you the rid of the first matching tuple.
+		*/
+		
+		//unclustered implementation
+		if (cluster == 0){
+			
+		}
+		//clustered implementation
+		else{
+			
+		}
 		return null;
+		
+		
 	}
 
 	@Override

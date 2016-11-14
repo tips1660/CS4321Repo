@@ -20,19 +20,20 @@ public class TreeDeserializer {
 	public int numLeaves;
 	public int order;
 	
-	private TreeNode currLeaf;
+	//private TreeNode currLeaf;
 	
-	TreeDeserializer(File indexFile, Integer lowkey, Integer highkey) throws IOException{
+	public TreeDeserializer(File indexFile, Integer lowkey, Integer highkey) throws IOException{
 		
 		this.indexFile = indexFile;
 		buffer = ByteBuffer.allocate(4096);
 		fs = new FileInputStream(indexFile);
 		fc = fs.getChannel();
 		extractHeaderData();
+		findLowKey(lowkey);
 			
 	}
 
-	private void findLowKey(Integer lowkey){
+	private void findLowKey(Integer lowkey) throws IOException{
 		
 		//no lower bound
 		if (lowkey == null){
@@ -40,14 +41,16 @@ public class TreeDeserializer {
 			
 		}
 		else{
+			//We must traverse to the first leafnode with lowkey value
 			deserializePage(rootAddress);
-			//start at root page, trace down until we find the lowkey value that matches and return that 
+			//
 			
 		}
 		
 	}
 	
-	private void deserializePage(Integer i){
+	
+	private void deserializePage(Integer i) throws IOException{
 		getPage(i);
 		
 		//0 leaf 1 index

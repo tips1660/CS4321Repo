@@ -22,10 +22,33 @@ public class TupleReader {
     public TupleReader(String fileName) throws IOException {
     	tuple = new ArrayList<Integer>();
     	fName = fileName;
-    	System.out.println(fName.toString());
+    	//System.out.println(fName.toString());
     	fin = new FileInputStream(fName);
     	fc = fin.getChannel();
     	getNextPage();
+    }
+    
+    //Constructor for index scan to handle lowkey
+    public TupleReader(String fileName, Integer pageID, Integer tupleID) throws IOException{
+    	tuple = new ArrayList<Integer>();
+    	fName = fileName;
+    	fin = new FileInputStream(fName);
+    	fc = fin.getChannel();
+    	
+    	//set the scan to begin reading at the given pid, tid
+    	buffer.clear();
+		buffer.put(new byte[4096]);
+		buffer.clear();
+		
+		long index = 4096 * pageID;
+		fc.position(index);
+		getNextPage();
+		
+		//potential off by one error based on indexing
+		while (currentTuple < tupleID-1){
+			tuple = getNextTuple();
+		}
+		
     }
     
     public TupleReader() throws IOException {
