@@ -90,62 +90,76 @@ public class JoinOperatorSuper extends Operator {
 				scanOperator scanLeft = new scanOperator(tableN);
 				ProjectOperator projectLeft = new ProjectOperator(items1, jList,tableN);
 				projectLeft.setChild(scanLeft);
-			 
+			      if(st == 0)
+			      {
 					leftOpSort = new SortOperator(items1, null);
 					leftOpSort.setTable(tableN);
 					leftOpSort.addToSortListActual(leftJoinExpR);
 					leftOpSort.setChild(projectLeft);
-				 /*
-				/*else // makes the external sort based smj
+			      }
+			     
+				 
+				else // makes the external sort based smj
 				{	
 					System.out.println("should be here first for external w/ no select");
-					leftOpExternal = new ExternalSortOperator(tempDir,sortBuffer,ctr,items1, null);
+					leftOpSort = new ExternalSortOperator(tempDir,sortBuffer,ctr,items1, null);
 					ctr++;
-					leftOpExternal.addToSortListActual(leftJoinExpR);
-					leftOpExternal.setChild(projectLeft);
-					System.out.println("should have made an external");
+					leftOpSort.addToSortListActual(leftJoinExpR);
+					leftOpSort.setTable(tableN);
+					leftOpSort.setChild(projectLeft);
+					System.out.println("JOINCODEV2: should have made an external, No select query");
 
 					// got rid of the table
-				}*/
+				}
 			}
 			else{
 				SelectOperator leftSelectOp = new SelectOperator(tableN, leftExp);
 				ProjectOperator projectLeft  = new ProjectOperator( items1,jList, tableN);
 				projectLeft.setChild(leftSelectOp);
- 					leftOpSort = new SortOperator(items1, null);
-					leftOpSort.addToSortListActual(leftJoinExpR);
-					leftOpSort.setTable(tableN);
-					leftOpSort.setChild(projectLeft);
+ 					if(st == 0)
+ 					{
+ 						 leftOpSort = new SortOperator(items1, null);
+ 						leftOpSort.addToSortListActual(leftJoinExpR);
+ 						leftOpSort.setTable(tableN);
+ 						leftOpSort.setChild(projectLeft);
+ 					}
+				   
 				 
-			/*	else
+				else
 				{
 					leftOpSort = new ExternalSortOperator(tempDir, sortBuffer, ctr,items1, null);
 					ctr++;
+					
+					leftOpSort.setTable(tableN);
 					leftOpSort.addToSortListActual(leftJoinExpR);
 					leftOpSort.setChild(projectLeft); 
-				}*/
+				}
 
 				// sort->project->select or scan
 				//somewhere here need to add the logic to make a sort operator on the left kid
 			}
-			//if(st==0){
-				System.out.println("correctly building this right?");
-				joinOpSMJ = new SMJOperator(leftOpSort, joinList, soloMap, joinMap, rejectedJoins, j2, ctr, tempDir, false);
-		//	}
-			//else{
-				//System.out.println("I have made the joinOpSMJ");
-				//joinOpSMJ = new SMJOperator(leftOpExternal, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir);
-				//ctr++;
-			//}
+		
+
+			System.out.println("correctly building this right?");
+			if(st==0)
+			joinOpSMJ = new SMJOperator(leftOpSort, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, false);
+			else{
+				System.out.println("JOINCODEV3: SHOULD HAVE MADE A SMJ WITH EX SET TO TRUE");
+				joinOpSMJ = new SMJOperator(leftOpSort, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, true);
+			}
+
+			
 			
 
 		}
 
 		while (joinList.size() > 1) {
+			System.out.println("JOINCODEV1: SHOULD HAVE NOT COME HERE FOR QUERIES WITH 1 JOIN");
 			Join first = joinList.remove(0);
 			String s = ((Table) first.getRightItem()).getWholeTableName();
 			tableProperties t = (tableProperties) cat.getTableCatalog().get(s);
 			numAttributes += t.getColumns().size();
+			System.out.println("i'm here now");
 			if (j1 == 0)
 				joinOp = new JoinOperator(joinOp, joinList, soloMap, joinMap, rejectedJoins);
 			else if(j1==1) {
@@ -154,6 +168,7 @@ public class JoinOperatorSuper extends Operator {
 			else
 			{//for SMJ
 				leftJoinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
+				System.out.println("i'm over in this else statement now in JOINOPSUPER");
 				if (leftJoinExp == null) {
 
 					if (!rejectedJoins.isEmpty()) {
@@ -162,30 +177,35 @@ public class JoinOperatorSuper extends Operator {
 					}
 
 				}
+				
 				ProjectOperator lastJoinProject = new ProjectOperator(items1,jList, joinOpSMJ.getTableName());
+                
 				lastJoinProject.setChild(joinOpSMJ);
 				leftJoinExpR = ((EqualsTo) leftJoinExp).getLeftExpression().toString();
-				//if(st==0){
+				System.out.println("i'm over before the choice now");
+				if(st==0){
 					joinTreeLeft = new SortOperator(items1, null);
 					joinTreeLeft.setTable(joinOpSMJ.getTableName());
 					joinTreeLeft.addToSortListActual(leftJoinExpR);
 					joinTreeLeft.setChild(lastJoinProject);
 					((SortOperator) joinTreeLeft).setupBuffer();
-					joinOpSMJ = new SMJOperator(joinTreeLeft, joinList, soloMap, joinMap, rejectedJoins, j2, ctr, tempDir, false);
+					joinOpSMJ = new SMJOperator(joinTreeLeft, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, false);
 					System.out.println("made that thing up");
-				//}
-				/*else
+				}
+				else
 				{
 					// join operator super needs to take in temp dir, it needs to take in buffer size, an
-					joinTreeLeftEx = new ExternalSortOperator(tempDir, sortBuffer, ctr, items1, null);
+					System.out.println("i'm here nowJOINOPSMJ");
+					joinTreeLeft = new ExternalSortOperator(tempDir, sortBuffer, ctr, items1, null);
 					ctr++;
 					//got rido f the table setting
-					joinTreeLeftEx.addToSortListActual(leftJoinExpR);
-					joinTreeLeftEx.setChild(lastJoinProject);
-					joinTreeLeftEx.sort();
-					joinOpSMJ = new SMJOperator(joinTreeLeftEx, joinList, soloMap, joinMap, rejectedJoins, j2, ctr, tempDir);
+					joinTreeLeft.addToSortListActual(leftJoinExpR);
+					joinTreeLeft.setChild(lastJoinProject);
+					joinTreeLeft.setTable(joinOpSMJ.getTableName());
+					System.out.println("left op should be ready");
+					joinOpSMJ = new SMJOperator(joinTreeLeft, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, true);
 					ctr++;
-				}*/
+				}
 			}
 		}
 	}

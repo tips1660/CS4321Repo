@@ -78,6 +78,7 @@ public class SortOperator extends SortOperatorParent  {
 	 */
 	public void setTable(Table t)
 	{
+		System.out.println("this things table is being set right");
 		table = t;
 	}
 	/**
@@ -328,11 +329,13 @@ public class SortOperator extends SortOperatorParent  {
 		}
 		//at this point my buffer should have everything and we now need to sort it.
 	}
+	public void sort() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+	
 
 	@Override
-	/**
-	 * Resets this operator such that getNextTuple() will return the first tuple it originally would.
-	 */
 	public void reset() {
 		
 	}
@@ -340,6 +343,7 @@ public class SortOperator extends SortOperatorParent  {
 	public void reset(int index){
 		ctr=index;
 	}
+
 	
 	
 
