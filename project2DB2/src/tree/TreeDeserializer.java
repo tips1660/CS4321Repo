@@ -16,9 +16,13 @@ public class TreeDeserializer {
 	public FileInputStream fs;
 	public FileChannel fc;
 	public File indexFile;
+	
 	public int rootAddress;
 	public int numLeaves;
 	public int order;
+	
+	
+	
 	
 	//private TreeNode currLeaf;
 	
@@ -33,6 +37,7 @@ public class TreeDeserializer {
 			
 	}
 
+	//
 	private void findLowKey(Integer lowkey) throws IOException{
 		
 		//no lower bound
@@ -42,8 +47,25 @@ public class TreeDeserializer {
 		}
 		else{
 			//We must traverse to the first leafnode with lowkey value
-			deserializePage(rootAddress);
+			//deserializePage(rootAddress);
+			//traverse through index nodes until we are at leaf
 			//
+			
+			deserializePage(rootAddress);
+			//IndexNode root = deserializePage(rootAddress);
+			//TreeNode curr = root;
+			//pageAddr = 1;
+			/**
+			 * while curr is an Index Node
+			 * 		deserialize it
+			 * 		Binary search through keys of index to find which path to traverse
+			 * 		Follow that pointer to the next node
+			 * 		update pageAddr to current page
+			 * 		Stop if we reach a leaf node
+			 * deserialize that final leaf node and return it
+			 */
+			
+			
 			
 		}
 		
