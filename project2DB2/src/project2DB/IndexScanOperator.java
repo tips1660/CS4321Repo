@@ -34,6 +34,10 @@ public class IndexScanOperator extends Operator {
 		
 	
 	}
+	
+	
+	
+	
 	@Override
 	public Tuple getNextTuple() {
 		// TODO Auto-generated method stub

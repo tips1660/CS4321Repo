@@ -104,6 +104,7 @@ public class parserTest {
 			
 			//Use these four values as arguments to construct your new B+ tree
 			//Make sure that buildIndex outputs final trees into input/db/indexes/
+			//Name the index files Relation+Attribute (i.e SailorsA)
 			//buildIndex(table,attribute,clustered,order);
 		
 		}
