@@ -2,22 +2,41 @@ package project2DB;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
 
+import tree.*;
 import net.sf.jsqlparser.schema.Table;
 
 public class IndexScanOperator extends Operator {
 	
 	public String table = "";
 	String alias;
+	private DatabaseCatalog dbcat = DatabaseCatalog.getInstance();
+	String fileUrl = "";
+	Tuple returnedTuple;
+	tableProperties tableR;
+	int tableCtr;
+	int finalValue;
+	File f;
+	ArrayList<Integer> tuples;
+	
+
 	int cluster;
 	Integer lowkey = null;
 	Integer highkey = null;
 	File indexFile = null;
+	TupleReader reader;
 	
-	
-	public IndexScanOperator(Table relation, File indexFile,int cluster,Integer low, Integer high){
+	public IndexScanOperator(Table relation, File indexFile,int cluster,Integer low, Integer high) throws IOException{
+		
 		alias = relation.getAlias();
 		table = relation.getWholeTableName();
+		tableR = (tableProperties) dbcat.getTableCatalog().get(table);
+		fileUrl = tableR.getUrl();
+		tuples = new ArrayList<Integer>();
+
+		
 		this.indexFile = indexFile;
 		this.cluster = cluster;
 		lowkey = low;
@@ -31,6 +50,36 @@ public class IndexScanOperator extends Operator {
 		do not deserialize the whole tree, deserialize only the pages that you need
 		*/
 		
+		TreeDeserializer td = new TreeDeserializer(indexFile,lowkey,highkey);
+
+		
+		//Set the reader based on existence of lowkey
+		if (lowkey == null){
+			try {
+				reader = new TupleReader(fileUrl);
+				}
+				catch (IOException e)
+				{
+					System.out.println("Could not create a new indexscanOperator");
+					e.printStackTrace();
+				}
+		}
+		else{
+			try {
+				reader = new TupleReader(fileUrl,pid,tid);
+				}
+				catch (IOException e)
+				{
+					System.out.println("Could not create a new indexscanOperator");
+					e.printStackTrace();
+				}	
+		}
+		
+
+		
+		
+		
+		f = new File(fileUrl);
 		
 	
 	}
@@ -56,6 +105,18 @@ public class IndexScanOperator extends Operator {
 		}
 		//clustered implementation
 		else{
+			//We simply scan through the normal db file until we reach highkey or EOF
+			//Todo: handle highkey for clusters
+			
+			Tuple returnedTuple = new Tuple(table, alias, reader);
+			if (alias == null)
+				returnedTuple.setName(table);
+			if (reader.getArrayList().isEmpty()) {
+				returnedTuple.setName("ENDOFFILE");
+				//System.out.println("endoffile");
+			}
+			//System.out.println(returnedTuple.getValues().keySet());
+			return returnedTuple;
 			
 		}
 		return null;
