@@ -19,7 +19,7 @@ public class TupleReader {
     private int currentByte;
     private ArrayList<Integer> tuple;
     private int currentPage = -1;
-    private int startByte = 0;
+    private int tupleNum = -1;
   
     //Constructor for index scan to handle lowkey
     public TupleReader(String fileName, Integer pageID, Integer tupleID) throws IOException{
@@ -107,7 +107,7 @@ public class TupleReader {
     	}
     	if (numBytes != -1) {
     		int currentAttribute = 0;
-    		startByte = currentByte;
+    		tupleNum++;
     		while (currentAttribute < numAttributes) {
     			currentAttribute++;
     			//System.out.print(buffer.getInt(currentByte) + " ");
@@ -119,9 +119,9 @@ public class TupleReader {
     	currentTuple++;
     	return tuple;
     }
-    public int getStartByte()
+    public int getTupleNum()
     {
-    	return startByte;
+    	return tupleNum;
     }
     public int getPage()
     {

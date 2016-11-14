@@ -17,7 +17,7 @@ public class Tuple{
 	private TupleReader reader;
 	private ArrayList<String> itemList = new ArrayList<String>();
 	private int page;
-	private int startByte;
+	private int tupleNum;
 	
 	/*
 	 * Deprecated
@@ -73,7 +73,7 @@ public class Tuple{
 		ArrayList<Integer> tuples = new ArrayList<Integer>();
 		tuples = reader.getNextTuple();
 		page = reader.getPage();
-		startByte = reader.getStartByte();
+		tupleNum = reader.getTupleNum();
 		for (int i = 0; i < tuples.size(); i++) {
 			if (alias != null) {
 				values.put(alias+"."+(String)table.getColumns().get(i), tuples.get(i));
@@ -88,9 +88,9 @@ public class Tuple{
 	{
 		return page;
 	}
-	public int getByte()
+	public int getTupleNum()
 	{
-		return startByte;
+		return tupleNum;
 	}
 	public void parseSort() throws IOException
 	{
