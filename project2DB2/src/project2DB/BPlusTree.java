@@ -49,105 +49,15 @@ public class BPlusTree {
 		}
 		root = indexLayersReal.get(indexLayersReal.size()-1).get(0);
 		//printLeafs();	 
-		printIndices(); 	
-		//printRealIndices();
+		//printIndices(); 	
+		printRealIndices();
 	}
 	// call this repeatedly till ctr = buffer size
 	public void initialIndexNodesReal()
-	{
+	{// call this repeatedly till ctr = buffer size
 		IndexNode node = new IndexNode();
-
-		if(arrayPtr == 0)
-		{  
-
-			node.getChildren().add(indexLayer.get(lastIndex));
-			node.setSmallestKey(indexLayer.get(lastIndex).getSmallestKey());
-			lastIndex++;
-
-			while(lastIndex < indexLayer.size())
-			{
-				if(node.getKeys().size() < (2 * order))
-				{
-					node.getKeys().add(indexLayer.get(lastIndex).getSmallestKey());
-					node.getChildren().add(indexLayer.get(lastIndex));
-					lastIndex++;
-				}
-				else
-				{
-					break;
-				}
-			}
-			if(indexLayersReal.size() > arrayPtr)
-			{
-				indexLayersReal.get(0).add(node);
-			}
-			else{
-				indexLayersReal.add(new ArrayList<IndexNode>());
-				indexLayersReal.get(0).add(node);
-			}
-
-			if(lastIndex == indexLayer.size()){
-				arrayPtr++;
-				lastIndex =0;
-			}
-		}
-		else{
-			if(indexLayersReal.get(arrayPtr-1).size() == 1){
-				stopIndexingLayeringReal = true;
-			}
-			else{
-
-
-				while(lastIndex < indexLayersReal.get(arrayPtr-1).size())
-				{
-
-					node.getChildren().add(indexLayersReal.get(arrayPtr-1).get(lastIndex));
-					lastIndex++;
-
-					if(node.getKeys().size() < (2 * order))
-					{
-						node.getKeys().add(indexLayersReal.get(arrayPtr-1).get(lastIndex).getSmallestKey());
-						node.getChildren().add(indexLayersReal.get(arrayPtr-1).get(lastIndex));
-						lastIndex++;
-					}
-					else
-					{
-						break;
-					}
-				}
-				if(indexLayersReal.size() > arrayPtr)
-				{
-					indexLayersReal.get(arrayPtr).add(node);
-				}
-				else
-				{
-					indexLayersReal.add(new ArrayList<IndexNode>());
-					indexLayersReal.get(arrayPtr).add(node);
-				}
-				if(lastIndex == indexLayersReal.get(arrayPtr-1).size()){
-					arrayPtr++;
-					lastIndex =0;
-				}
-
-
-
-			}
-		}
-
-	}
-	public void initializeIndexNodes()
-	{	IndexNode node = new IndexNode();
-
-	
-
-
-	numChildrenToBeAdded = leafLayer.size()-indexCtr;
-	if((numChildrenToBeAdded < (3 * order + 2)) && (numChildrenToBeAdded > (2 * order +1)))
-	{
-		node.getChildren().add(leafLayer.get(indexCtr));
-		node.setSmallestKey(leafLayer.get(indexCtr).getSmallestKey());
-		indexCtr++;
- 		while(mCtr < (numChildrenToBeAdded/2)-1)
+		/*indexCtr++;
+		while(mCtr < (numChildrenToBeAdded/2)-1)
 		{
 			node.getKeys().add(leafLayer.get(indexCtr).getSmallestKey());
 			node.getChildren().add(leafLayer.get(indexCtr));
@@ -168,35 +78,255 @@ public class BPlusTree {
 		}
 		indexLayer.add(node);
 		continueCreateIndexNodes = false;
-		indexCtr=0;
+		indexCtr=0;*/
+		if(arrayPtr == 0)
+		{  
+			numChildrenToBeAdded = indexLayer.size()-lastIndex;
+			if(numChildrenToBeAdded < (3 * order + 2) && numChildrenToBeAdded > (2 * order + 2))
+			{
+				/*
+				 * This section checks (in the case arrayPtr =0) for the special condition that children left is < 3 * order + 2 and > 2 * order + 2
+				 */
+				node.getChildren().add(indexLayer.get(lastIndex));
+				node.setSmallestKey(indexLayer.get(lastIndex).getSmallestKey());
+				lastIndex++;
+				mCtr=0;
+				while(mCtr<((numChildrenToBeAdded/2)-1))
+				{
+					node.getKeys().add(indexLayer.get(lastIndex).getSmallestKey());
+					node.getChildren().add(indexLayer.get(lastIndex));
+					lastIndex++;
+					mCtr++;
+				}
+				if(indexLayersReal.size() > arrayPtr)
+				{
+					indexLayersReal.get(arrayPtr).add(node);
+				}
+				else
+				{
+					indexLayersReal.add(new ArrayList<IndexNode>());
+					indexLayersReal.get(arrayPtr).add(node);
+				}
+				node= new IndexNode();
+				mCtr=0;
+				node.getChildren().add(indexLayer.get(lastIndex));
+				node.setSmallestKey(indexLayer.get(lastIndex).getSmallestKey());
+				lastIndex++;
+				while(lastIndex<indexLayer.size())
+				{
+					node.getKeys().add(indexLayer.get(lastIndex).getSmallestKey());
+					node.getChildren().add(indexLayer.get(lastIndex));
+					lastIndex++;
+				}
+				if(indexLayersReal.size() > arrayPtr)
+				{
+					indexLayersReal.get(arrayPtr).add(node);
+				}
+				else
+				{
+					indexLayersReal.add(new ArrayList<IndexNode>());
+					indexLayersReal.get(arrayPtr).add(node);
+				}
+				arrayPtr++;
+				lastIndex=0;
+			}
+			else {
+				node.getChildren().add(indexLayer.get(lastIndex));
+				node.setSmallestKey(indexLayer.get(lastIndex).getSmallestKey());
+				lastIndex++;
+
+				while(lastIndex < indexLayer.size())
+				{
+					if(node.getKeys().size() < (2 * order))
+					{
+						node.getKeys().add(indexLayer.get(lastIndex).getSmallestKey());
+						node.getChildren().add(indexLayer.get(lastIndex));
+						lastIndex++;
+					}
+					else
+					{
+						break;
+					}
+				}
+				if(indexLayersReal.size() > arrayPtr)
+				{
+					indexLayersReal.get(0).add(node);
+				}
+				else{
+					indexLayersReal.add(new ArrayList<IndexNode>());
+					indexLayersReal.get(0).add(node);
+				}
+
+				if(lastIndex == indexLayer.size()){
+					arrayPtr++;
+					lastIndex =0;
+				}
+				stopIndexingLayeringReal = true;
+				lastIndex = 0;
+			}
+		}
+		else{
+			if(indexLayersReal.get(arrayPtr-1).size() == 1){
+				stopIndexingLayeringReal = true;
+			}
+			else{
+
+				ArrayList<IndexNode> lastArr = indexLayersReal.get(arrayPtr-1);
+				numChildrenToBeAdded = lastArr.size()-lastIndex;
+				if(numChildrenToBeAdded < (3 * order + 2) && numChildrenToBeAdded > (2 * order + 2))
+				{
+					/*
+					 * This section checks (in the case arrayPtr =0) for the special condition that children left is < 3 * order + 2 and > 2 * order + 2
+					 */
+					node.getChildren().add(lastArr.get(lastIndex));
+					node.setSmallestKey(lastArr.get(lastIndex).getSmallestKey());
+					lastIndex++;
+					mCtr=0;
+					while(mCtr<((numChildrenToBeAdded/2)-1))
+					{
+						node.getKeys().add(lastArr.get(lastIndex).getSmallestKey());
+						node.getChildren().add(lastArr.get(lastIndex));
+						lastIndex++;
+						mCtr++;
+					}
+					if(indexLayersReal.size() > arrayPtr)
+					{
+						indexLayersReal.get(arrayPtr).add(node);
+					}
+					else
+					{
+						indexLayersReal.add(new ArrayList<IndexNode>());
+						indexLayersReal.get(arrayPtr).add(node);
+					}
+					node= new IndexNode();
+					mCtr=0;
+					node.getChildren().add(lastArr.get(lastIndex));
+					node.setSmallestKey(lastArr.get(lastIndex).getSmallestKey());
+					lastIndex++;
+					while(lastIndex<lastArr.size())
+					{
+						node.getKeys().add(lastArr.get(lastIndex).getSmallestKey());
+						node.getChildren().add(lastArr.get(lastIndex));
+						lastIndex++;
+					}
+					if(indexLayersReal.size() > arrayPtr)
+					{
+						indexLayersReal.get(arrayPtr).add(node);
+					}
+					else
+					{
+						indexLayersReal.add(new ArrayList<IndexNode>());
+						indexLayersReal.get(arrayPtr).add(node);
+					}
+					arrayPtr++;
+					lastIndex=0;
+				}
+				else
+				{
+					while(lastIndex < indexLayersReal.get(arrayPtr-1).size())
+					{
+
+						node.getChildren().add(indexLayersReal.get(arrayPtr-1).get(lastIndex));
+						lastIndex++;
+
+						if(node.getKeys().size() < (2 * order))
+						{
+							node.getKeys().add(indexLayersReal.get(arrayPtr-1).get(lastIndex).getSmallestKey());
+							node.getChildren().add(indexLayersReal.get(arrayPtr-1).get(lastIndex));
+							lastIndex++;
+						}
+						else
+						{
+							break;
+						}
+					}
+					if(indexLayersReal.size() > arrayPtr)
+					{
+						indexLayersReal.get(arrayPtr).add(node);
+					}
+					else
+					{
+						indexLayersReal.add(new ArrayList<IndexNode>());
+						indexLayersReal.get(arrayPtr).add(node);
+					}
+					if(lastIndex == indexLayersReal.get(arrayPtr-1).size()){
+						arrayPtr++;
+						lastIndex =0;
+					}
+
+
+
+				}
+			}
+		}
+
 	}
-	else
-	{
-		node.getChildren().add(leafLayer.get(indexCtr));
-		node.setSmallestKey(leafLayer.get(indexCtr).getSmallestKey());
-		indexCtr++;
-		while(indexCtr< leafLayer.size()){
-			if(node.getKeys().size() < (2 * order) )
-			{   
+
+
+
+
+
+
+
+	public void initializeIndexNodes()
+	{	
+		IndexNode node = new IndexNode();
+		numChildrenToBeAdded = leafLayer.size()-indexCtr;
+		if((numChildrenToBeAdded < (3 * order + 2)) && (numChildrenToBeAdded > (2 * order +1)))
+		{
+			node.getChildren().add(leafLayer.get(indexCtr));
+			node.setSmallestKey(leafLayer.get(indexCtr).getSmallestKey());
+			indexCtr++;
+			while(mCtr < (numChildrenToBeAdded/2)-1)
+			{
+				node.getKeys().add(leafLayer.get(indexCtr).getSmallestKey());
+				node.getChildren().add(leafLayer.get(indexCtr));
+				mCtr++;
+				indexCtr++;
+			}
+			indexLayer.add(node);
+			node = new IndexNode();
+			mCtr=0;
+			node.getChildren().add(leafLayer.get(indexCtr));
+			node.setSmallestKey(leafLayer.get(indexCtr).getSmallestKey());
+			indexCtr++;
+			while(indexCtr < leafLayer.size())
+			{
 				node.getKeys().add(leafLayer.get(indexCtr).getSmallestKey());
 				node.getChildren().add(leafLayer.get(indexCtr));
 				indexCtr++;
 			}
-			else
-			{
+			indexLayer.add(node);
+			continueCreateIndexNodes = false;
+			indexCtr=0;
+		}
+		else
+		{
+			node.getChildren().add(leafLayer.get(indexCtr));
+			node.setSmallestKey(leafLayer.get(indexCtr).getSmallestKey());
+			indexCtr++;
+			while(indexCtr< leafLayer.size()){
+				if(node.getKeys().size() < (2 * order) )
+				{   
+					node.getKeys().add(leafLayer.get(indexCtr).getSmallestKey());
+					node.getChildren().add(leafLayer.get(indexCtr));
+					indexCtr++;
+				}
+				else
+				{
 
-				break;
+					break;
+				}
+			}
+			if(node.getKeys().size() > 0 )
+				indexLayer.add(node);
+			if(indexCtr == leafLayer.size())
+			{
+				continueCreateIndexNodes = false;
 			}
 		}
-		if(node.getKeys().size() > 0 )
-		indexLayer.add(node);
-		if(indexCtr == leafLayer.size())
-		{
-			continueCreateIndexNodes = false;
-		}
-	}
 
-	// if done iterating as in you hit the end, you should 
+		// if done iterating as in you hit the end, you should 
 
 	}
 
@@ -211,7 +341,7 @@ public class BPlusTree {
 				node = updateNode(node,kConditionCheck);
 
 			}
-			
+
 			leafLayer.add(node);
 			breakCondition = false;
 		}
@@ -303,17 +433,17 @@ public class BPlusTree {
 		return node;
 	}
 
-	 public void sortLeafs()
-	 {
-		 for(int i =0; i< leafLayer.size(); i++)
-		 {
-			 Object[] keys = leafLayer.get(i).getDataEntry().keySet().toArray();
-			 for(int j =0; j<keys.length; j++)
-			 {
-				 leafLayer.get(i).sort((int)keys[j]);
-			 }
-		 }
-	 }
+	public void sortLeafs()
+	{
+		for(int i =0; i< leafLayer.size(); i++)
+		{
+			Object[] keys = leafLayer.get(i).getDataEntry().keySet().toArray();
+			for(int j =0; j<keys.length; j++)
+			{
+				leafLayer.get(i).sort((int)keys[j]);
+			}
+		}
+	}
 	public boolean kCondition()
 	{
 		if(uniqueKeysLeft < (3 * order) && uniqueKeysLeft > (2 * order))
@@ -352,21 +482,21 @@ public class BPlusTree {
 			System.out.println("with index node: "  + (i+1) + " taken  into account I have: " + accumulator + "children.");
 
 		}
-		
-        for(int i =0; i< indexLayer.size(); i++)
-        {
-        	System.out.print("Here are all the keys for this index node: ");
-        	for(int j =0; j<indexLayer.get(i).getKeys().size(); j++){
-        		System.out.print(indexLayer.get(i).getKeys().get(j) + ", ");
-        	}
-        	System.out.println();
-        	
-        }
-        
+
+		for(int i =0; i< indexLayer.size(); i++)
+		{
+			System.out.print("Here are all the keys for this index node: ");
+			for(int j =0; j<indexLayer.get(i).getKeys().size(); j++){
+				System.out.print(indexLayer.get(i).getKeys().get(j) + ", ");
+			}
+			System.out.println();
+
+		}
+
 		System.out.println();
 		LeafNode t=  new LeafNode();
 		LeafNode p = ((LeafNode)(indexLayer.get(0).getChildren().get(0)));
-	
+
 		System.out.println("In total, I have these many leaves accounted for: " + accumulator);
 		System.out.println("my k was: " + k);
 		System.out.println("but my buffer size was: " + buffer.size());
@@ -405,17 +535,17 @@ public class BPlusTree {
 	{
 		return root;
 	}
-   public ArrayList<LeafNode> getLeafNodeList()
-   {
-	   return leafLayer;
-   }
-   public ArrayList<IndexNode> getIndexImmediateLayer()
-   {
-	   return indexLayer;
-   }
-   public ArrayList<ArrayList<IndexNode>> getIndexNodeList()
-   {
-	   return indexLayersReal;
-   }
-   
+	public ArrayList<LeafNode> getLeafNodeList()
+	{
+		return leafLayer;
+	}
+	public ArrayList<IndexNode> getIndexImmediateLayer()
+	{
+		return indexLayer;
+	}
+	public ArrayList<ArrayList<IndexNode>> getIndexNodeList()
+	{
+		return indexLayersReal;
+	}
+
 }
