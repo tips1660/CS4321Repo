@@ -130,11 +130,11 @@ public class TreeSerializer {
 					finishWriting();
 				}
 			}
-			for(int i = 0; i<indexNodeLayering.size(); i++)
+ 			for(int i = 0; i<indexNodeLayering.size(); i++)
 			{
 				for(int j =0; j<indexNodeLayering.get(i).size(); j++)
 				{
-					if(currentByte == 0)
+ 					if(currentByte == 0)
 					{
 						indexNodeLayering.get(i).get(j).pageNumber = currentPage;
 						buffer.putInt(currentByte,1);
@@ -144,11 +144,13 @@ public class TreeSerializer {
 						ArrayList<Integer> keys = indexNodeLayering.get(i).get(j).getKeys();
 						ArrayList<TreeNode> children = indexNodeLayering.get(i).get(j).getChildren();
 						Collections.sort(keys);
+						System.out.println("there should be 15 keys: " + keys.size());
 						for(int p=0; p< keys.size(); p++)
 						{
 							buffer.putInt(currentByte, keys.get(p));
 							currentByte+=4;
 						}
+						System.out.println("there should be 16 children: " + children.size());
 						for(int p =0; p < children.size(); p++){
 							buffer.putInt(currentByte, ((IndexNode)children.get(p)).pageNumber);
 							currentByte+=4;
