@@ -1,5 +1,5 @@
 package project2DB;
 
-public class TreeNode {
-
+public abstract class TreeNode {
+     public abstract int getSmallestKey();
 }
