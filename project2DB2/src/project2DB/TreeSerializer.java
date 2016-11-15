@@ -98,8 +98,63 @@ public class TreeSerializer {
 							currentByte+=4;
 
 						}
+						leafs.get(i).pageNumber = currentPage;
+
 					}
                    finishWriting();
+				}
+			}
+			for(int i =0; i<firstIndexLevel.size(); i++)
+			{
+				
+				if(currentByte == 0){
+					firstIndexLevel.get(i).pageNumber= currentPage;
+
+					buffer.putInt(currentByte, 1);
+					currentByte+=4;
+					buffer.putInt(currentByte, firstIndexLevel.get(i).getKeys().size());
+					currentByte+=4;
+					ArrayList<Integer> keys = firstIndexLevel.get(i).getKeys();
+					ArrayList<TreeNode> children = firstIndexLevel.get(i).getChildren();
+					Collections.sort(keys);
+					for(int j =0; j< keys.size(); j++)
+					{
+						buffer.putInt(currentByte, keys.get(j));
+						currentByte+=4;
+					}
+					for(int j=0; j<children.size(); j++)
+					{
+						buffer.putInt(currentByte, ((LeafNode)children.get(j)).pageNumber);
+						currentByte+=4;
+					}
+					finishWriting();
+				}
+			}
+			for(int i = 0; i<indexNodeLayering.size(); i++)
+			{
+				for(int j =0; j<indexNodeLayering.get(i).size(); j++)
+				{
+					if(currentByte == 0)
+					{
+						indexNodeLayering.get(i).get(j).pageNumber = currentPage;
+						buffer.putInt(currentByte,1);
+						currentByte+=4;
+						buffer.putInt(currentByte, indexNodeLayering.get(i).get(j).getKeys().size());
+						currentByte+=4;
+						ArrayList<Integer> keys = indexNodeLayering.get(i).get(j).getKeys();
+						ArrayList<TreeNode> children = indexNodeLayering.get(i).get(j).getChildren();
+						Collections.sort(keys);
+						for(int p=0; p< keys.size(); p++)
+						{
+							buffer.putInt(currentByte, keys.get(p));
+							currentByte+=4;
+						}
+						for(int p =0; p < children.size(); p++){
+							buffer.putInt(currentByte, ((IndexNode)children.get(p)).pageNumber);
+							currentByte+=4;
+						}
+						finishWriting();
+					}
 				}
 			}
 		}

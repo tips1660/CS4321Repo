@@ -21,13 +21,13 @@ public class IndexNode extends TreeNode{
 	}
 	@Override
 	public int getSmallestKey() {
-		 for(int i =0; i < keys.size(); i ++)
-		 {
-			 if(keys.get(i) < smallest)
-				 smallest = keys.get(i);
-			 
-		 }
+		 
 		 return smallest;
+	}
+	public void setSmallestKey(int smallestKey) {
+		// TODO Auto-generated method stub
+		this.smallest = smallestKey;
+		
 	}
 	
 	
