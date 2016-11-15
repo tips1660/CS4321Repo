@@ -144,5 +144,3 @@ public final class DatabaseCatalog {
 		indexes = idx;
 	}
 }
-
-	

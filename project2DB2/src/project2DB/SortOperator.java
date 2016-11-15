@@ -36,6 +36,7 @@ public class SortOperator extends SortOperatorParent  {
 	private Table table;
     boolean bufferInit = false;
     int ctrBuffer =0;
+    
 	
 	public SortOperator(String out, ArrayList<SelectItem> items1, List<OrderByElement> orderList) throws IOException
 	{    
@@ -78,7 +79,13 @@ public class SortOperator extends SortOperatorParent  {
 	 */
 	public void setTable(Table t)
 	{
+		System.out.println("this things table is being set right");
 		table = t;
+	}
+	
+	public ArrayList<Tuple> getBuffer()
+	{
+		return buffer;
 	}
 	/**
 	 * Adds a new OrderByElement to the list containing them
@@ -211,7 +218,6 @@ public class SortOperator extends SortOperatorParent  {
 
 	   while(true)
 	   {
-		   System.out.println("got into the while true loop in sort operator");
 		   if(currentTuple == null){
 
 			   currentTuple= child.getNextTuple();
@@ -328,11 +334,13 @@ public class SortOperator extends SortOperatorParent  {
 		}
 		//at this point my buffer should have everything and we now need to sort it.
 	}
+	public void sort() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+	
 
 	@Override
-	/**
-	 * Resets this operator such that getNextTuple() will return the first tuple it originally would.
-	 */
 	public void reset() {
 		
 	}
@@ -340,6 +348,7 @@ public class SortOperator extends SortOperatorParent  {
 	public void reset(int index){
 		ctr=index;
 	}
+
 	
 	
 

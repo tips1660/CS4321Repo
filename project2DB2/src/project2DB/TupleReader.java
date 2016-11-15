@@ -18,16 +18,9 @@ public class TupleReader {
     private int currentTuple;
     private int currentByte;
     private ArrayList<Integer> tuple;
-    
-    public TupleReader(String fileName) throws IOException {
-    	tuple = new ArrayList<Integer>();
-    	fName = fileName;
-    	//System.out.println(fName.toString());
-    	fin = new FileInputStream(fName);
-    	fc = fin.getChannel();
-    	getNextPage();
-    }
-    
+    private int currentPage = -1;
+    private int tupleNum = -1;
+  
     //Constructor for index scan to handle lowkey
     public TupleReader(String fileName, Integer pageID, Integer tupleID) throws IOException{
     	tuple = new ArrayList<Integer>();
@@ -51,6 +44,15 @@ public class TupleReader {
 		
     }
     
+    public TupleReader(String fileName) throws IOException {
+    	tuple = new ArrayList<Integer>();
+    	fName = fileName;
+    	System.out.println(fName.toString());
+    	fin = new FileInputStream(fName);
+    	fc = fin.getChannel();
+    	getNextPage();
+    }
+    
     public TupleReader() throws IOException {
     	
     }
@@ -65,6 +67,8 @@ public class TupleReader {
     }
     
     public int getNextPage() throws IOException {
+    	tupleNum=-1;
+    	currentPage+=1;
     	buffer.clear();
     	int numBytes = fc.read(buffer);
     	//System.out.println("getNextPage was called");
@@ -104,6 +108,7 @@ public class TupleReader {
     	}
     	if (numBytes != -1) {
     		int currentAttribute = 0;
+    		tupleNum++;
     		while (currentAttribute < numAttributes) {
     			currentAttribute++;
     			//System.out.print(buffer.getInt(currentByte) + " ");
@@ -114,5 +119,13 @@ public class TupleReader {
     	}
     	currentTuple++;
     	return tuple;
+    }
+    public int getTupleNum()
+    {
+    	return tupleNum;
+    }
+    public int getPage()
+    {
+    	return currentPage;
     }
 }

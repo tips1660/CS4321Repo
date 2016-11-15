@@ -59,7 +59,7 @@ public class SMJOperator extends Operator {
 		}
 		else
 		{
-			rightOp = new ExternalSortOperator(tempDir, j2, ctr, items1, null);
+ 			rightOp = new ExternalSortOperator(tempDir, j2, ctr, items1, null);
 			ex=true;
 
 		}
@@ -82,6 +82,8 @@ public class SMJOperator extends Operator {
 			}
 
 		}
+		System.out.println("SMJCode v2: My JoinEXP is: " + joinExp.toString());
+
 		rightExp = soloMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
 		if (rightExp == null){
 			// for in memory sorting
@@ -90,6 +92,8 @@ public class SMJOperator extends Operator {
 			projectRight.setChild(scanRight);
 			rightOp.addToSortListActual(((BinaryExpression)(joinExp)).getRightExpression().toString());
 			rightOp.setChild(projectRight);
+			System.out.println("SMJCode v1: Made my right Op");
+
 		}
 		else{
 			System.out.println("did i get into this thing? my right exp is: " + rightExp );
@@ -104,14 +108,18 @@ public class SMJOperator extends Operator {
 		System.out.println("got out of this");
 
 
-		while(a==null)
+		while(a==null){
 			a= leftOp.getNextTuple();
 
-		System.out.println("got something here");
+			
+		}
+         
+		System.out.println("SMJCode v3: my a tuple is: " + a.getValues());
 
 		b=rightOp.getNextTuple();
 
-		System.out.println("Got something for b");
+		 if(b!=null)
+		System.out.println("SMJCode v3: my b tuple is: " + b.getValues());
 	}
 
 	public int tupleCompare(Tuple a, Tuple b)
@@ -211,16 +219,17 @@ public class SMJOperator extends Operator {
 			while(tupleCompare(a,b) == 0)
 			{
 				System.out.println("should have come into this  while loop");
+				System.out.println("SMJCode v4: my A is: " + a.getValues() + " My b is:  " + b.getValues());
 				/*
 				 * need to add the code for resetting.
 				 */
 				partitionTraverser=0;
+				System.out.println(partitionCtr + "my partition Ctr is this value..");
 				rightOp.reset(partitionCtr);
 				rightPartitionTraverser=rightOp.getNextTuple();
 
+				System.out.println("My right partition is at: " + rightPartitionTraverser.getValues());
 
-
-				System.out.println(" I got my thing");
 				if(rightPartitionTraverser == b)
 					System.out.println("partitionThing and b are equal");
 
@@ -231,7 +240,7 @@ public class SMJOperator extends Operator {
 					values = concatTuples(a,rightPartitionTraverser);
 					returnedTuple.setName(a.getTable());
 					returnedTuple.setValues(values);
-					System.out.println(" I am writing: " + returnedTuple.getValues() + " this is the " + bufferCtr + " write");
+					System.out.println("SMJCode v5: I am writing: " + returnedTuple.getValues() + " this is the " + bufferCtr + " write");
 					tupleBuffer.put(bufferCtr, returnedTuple);
 					bufferCtr++;
 
@@ -262,8 +271,8 @@ public class SMJOperator extends Operator {
 				rightOp.reset(partitionCtr+partitionTraverser);
 				b=rightOp.getNextTuple();
 			
-			
 			partitionCtr= partitionCtr+partitionTraverser;
+
 
 			System.out.println("B and A are no longer equal. The next B has this value set: " + b.getValues());
 			System.out.println("the A has the following value set: " + a.getValues());
@@ -376,7 +385,12 @@ public class SMJOperator extends Operator {
 		for(int i =0; i< tuple1.getValues().size(); i++)
 		{
 			String accessor = (String)(tuple1.getValues().keySet().toArray()[i]);
+			if(accessor.contains("ESORT")){
+				continue;
+			}
+			else{
 			val1.put(accessor,(Integer)tuple1.getValues().get(accessor));
+			}
 
 		}
 
@@ -384,16 +398,21 @@ public class SMJOperator extends Operator {
 		for(int i =0; i < val2.size(); i++)
 		{
 			String accessor = (String)(val2.keySet().toArray()[i]);
+			if(accessor.contains("ESORT")){
+				continue;
+			}
+			else{
 			//gets the key im on for tuple2
 			if(val1.get(accessor) !=null)
 			{
-				val1.put(accessor + "1", val2.get(accessor));
+ 				val1.put(accessor + "1", val2.get(accessor));
 			}
 			else
 			{
-
+ 
 				val1.put(accessor,val2.get(accessor));
 
+			}
 			}
 		}
 		return val1;

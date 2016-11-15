@@ -20,6 +20,7 @@ public class TupleWriter {
 	private int currentByte;
 	private int startOfTuple;
 	private Tuple tuple;
+	private ArrayList<Integer> valuesFiltered = new ArrayList<Integer>();
 	private ArrayList<Integer> values = new ArrayList<Integer>();
 	
 	public TupleWriter(String fname) throws IOException {
@@ -52,9 +53,13 @@ public class TupleWriter {
 	{
 		ArrayList<Integer> val = new ArrayList<Integer>();
 		ArrayList<String> items = t.getItemList();
+		 
 		//System.out.println(t.getValues());
 		for(int i =0; i< items.size(); i++)
-		{
+		{  
+			if(t.getValues().get(items.get(i)) == null)
+				continue;
+			else
 			val.add((Integer)t.getValues().get(items.get(i)));
 		}
 		return val;
@@ -71,10 +76,10 @@ public class TupleWriter {
 			System.out.println("Writer got end of file. Returning");
 			return;
 		}
-		
+		System.out.println("The tuple getting put into values is: " + t.getValues());
 		values = tupleSort(t);
 
-		System.out.println(values);
+		System.out.println("what i got from tuple sort was: " + values);
 		if (currentByte == 0) {
 			System.out.println("initializing a new page");
 			numAttributes = values.size();
@@ -92,8 +97,9 @@ public class TupleWriter {
 			buffer.putInt(4, numTuples);
 			if (currentByte < 4096) {
 				buffer.putInt(currentByte, values.get(i));
-				System.out.println("The value at :" + currentByte+" is " +buffer.getInt(currentByte));
-				currentByte += 4; 
+				System.out.println("got to this thingamajig in TupleWriter");
+
+ 				currentByte += 4; 
 				if (currentByte == 4096 && i == (values.size()-1)) {
 					wasLast = true;
 				}

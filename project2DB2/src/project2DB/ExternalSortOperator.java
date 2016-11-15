@@ -48,7 +48,9 @@ public class ExternalSortOperator extends SortOperatorParent {
     
     String dir = "";
     int b;
+    int bufferSize=0;
     int numAttributes;
+    Table table;
     int numTuples;
     int numPass;
     int numRuns = 0;
@@ -85,6 +87,8 @@ public class ExternalSortOperator extends SortOperatorParent {
 			numAttributes = 4088/items.size();
 		}*/
 		numPass = 0;
+		this.bufferSize = bufferSize;
+
 		//ArrayList<String> firstPass = new ArrayList<String>();
 		/*f = new File(dir + File.separator + numPass);
 		f.mkdir();
@@ -102,6 +106,7 @@ public class ExternalSortOperator extends SortOperatorParent {
 		dir = tempDir + File.separator + dirNum;
 		File f = new File(dir);
 		f.mkdir();
+		this.bufferSize = bufferSize;
 		b = bufferSize;
 		items = items1;
 		sortList = orderList;
@@ -167,7 +172,11 @@ public class ExternalSortOperator extends SortOperatorParent {
 		}
 		fname = dir + File.separator + "pass"+numPass + File.separator + 0;
 	}
-	
+	public void setTable(Table tableN) {
+		System.out.println("setting table");
+		table = tableN;
+		
+	}
 	public void pass0() throws IOException 
 	{
 		System.out.println("Starting pass 0");
@@ -187,10 +196,15 @@ public class ExternalSortOperator extends SortOperatorParent {
 				firstPass.add(outputdir);
 				TupleWriter writer = new TupleWriter(firstPass.get(numRuns-1));
 			System.out.println("changed writer file");
+			b= bufferSize;
+
+			System.out.println("b isCODEV4: " + b);
 			for (int i = 0; i < b; i++) {
+				System.out.println("got into external sort for loopCODEV1");
 				if (eof)
 					break;
 				for (int j = 0; j < numTuples; j++) {
+					System.out.println("got into external sort for loop 2CODEV2");
 					currentTuple = child.getNextTuple();
 					while (currentTuple == null)
 						currentTuple = child.getNextTuple();
@@ -208,6 +222,8 @@ public class ExternalSortOperator extends SortOperatorParent {
 				}
 			}
 			try {
+				System.out.println("am i just goign to this sort? CODEV3" );
+				System.out.println("Buffer0 size is: " + buffer0.size() + " codev7");
 				Collections.sort(buffer0, TupleComparator);
 			}
 			catch(Exception e) {
@@ -493,10 +509,13 @@ public class ExternalSortOperator extends SortOperatorParent {
 			}
 		}
 		Tuple currentTuple = new Tuple(reader);
+
 		setItemList(currentTuple);
+
 		try {
 			currentTuple.changeColumns();
-		} catch (IOException e) {
+
+ 		} catch (IOException e) {
 			System.out.println("Could not change columns of this tuple");
 			e.printStackTrace();
 		}
@@ -563,16 +582,46 @@ public class ExternalSortOperator extends SortOperatorParent {
 	}
 
 
-	@Override
 	public void reset(int index) {
-		// TODO Auto-generated method stub
+		try {
+			reader = new TupleReader(fname);
+		} 
+		catch (IOException e) {
+			System.out.println("Reset failed; could not create new reader");
+			e.printStackTrace();
+		}
+		int counter = reader.getNumTuples();
+		System.out.println("counter is: " + counter);
+		System.out.println("index is: " + index);
 		
+		while (counter < index && index > counter+numTuples) {
+			System.out.println("counter is: " + counter);
+			System.out.println("index is: " + index);
+			System.out.println("counter+numTuples is " + (counter+numTuples));
+			System.out.println("reader num tuples is: " + reader.getNumTuples());
+			try {
+				reader.getNextPage();
+			} 
+			catch (IOException e) {
+				System.out.println("Could not get next page.");
+				e.printStackTrace();
+			}
+			counter += numTuples;
+			System.out.println("reader num tuples is: " + reader.getNumTuples());
+
+		}
+		int difference = index - counter;
+		if(difference < 0)
+			difference = index;
+		System.out.println("the difference value is: " + difference);
+		for (int i = 0; i < difference; i++) {
+
+			Tuple a =getNextTuple();
+			System.out.println(a.getValues() + " this is my new ExtOpCode2");
+		}
 	}
-	@Override
-	public void setTable(Table tableN) {
-		// TODO Auto-generated method stub
-		
-	}
+
+
 	@Override
 	public void addToSortListActual(String leftJoinExpR) {
 		// TODO Auto-generated method stub
@@ -581,7 +630,8 @@ public class ExternalSortOperator extends SortOperatorParent {
 	@Override
 	public Table getTable() {
 		// TODO Auto-generated method stub
-		return null;
+		System.out.println("getting table");
+		return table;
 	}
 	
 	

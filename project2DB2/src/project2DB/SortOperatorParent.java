@@ -24,8 +24,14 @@ public abstract class SortOperatorParent extends Operator {
 	    public abstract void dump() throws IOException;
 
 
-
 		public abstract Table getTable();
+
+
+
+		public abstract void sort() throws IOException;
+			// TODO Auto-generated method stub
+			
+	 
 		 
 
 }

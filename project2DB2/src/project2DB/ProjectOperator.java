@@ -38,6 +38,7 @@ public class ProjectOperator extends Operator {
 	ArrayList<String> columnList = new ArrayList<String>();
 	private Hashtable<String, String> tableAlias = new Hashtable<String, String>();
 	private TupleWriter writer;
+	AllColumns asterik = new AllColumns();
 
 
 	public ProjectOperator(String out, ArrayList<SelectItem> items, List<Join> joinList, Table tableN) throws IOException{
@@ -56,8 +57,17 @@ public class ProjectOperator extends Operator {
 		{
 			if(tableN.getAlias()!=null)
 				columnList.add(tableN.getAlias() + "." +tableR.getColumns().get(i));
-			else
-				columnList.add(tableN.getWholeTableName() + "." + tableR.getColumns().get(i));
+			else{
+				if(tableN.getWholeTableName().substring(0, 1).equals("."))
+				{
+					System.out.println("I am coming to this thing");
+					columnList.add(tableN.getWholeTableName().substring(1) + "." + tableR.getColumns().get(i));
+				}
+				else{
+
+					columnList.add(tableN.getWholeTableName() + "." + tableR.getColumns().get(i));
+				}
+			}
 		}
 
 		if(joinList!=null){
@@ -84,16 +94,21 @@ public class ProjectOperator extends Operator {
 
 		}
 		//else if (select != null) {
-			//child = new SelectOperator(tableN, select);
+		//child = new SelectOperator(tableN, select);
 
 		//}
 		//else {
-			//child = new scanOperator(tableN);
+		//child = new scanOperator(tableN);
 
 		//}
-		this.items = items;
 
-
+		if(items!=null){
+			this.items = items;
+			}
+			else{
+				this.items = new ArrayList<SelectItem>();
+				this.items.add(asterik);
+			}
 
 		fileUrl = tableR.getUrl();
 
@@ -101,24 +116,43 @@ public class ProjectOperator extends Operator {
 		scan = new Scanner(f);
 
 	}
-	
+
 	public ProjectOperator(ArrayList<SelectItem> items, List<Join> joinList,  Table tableN) throws IOException{
 		/*
 		 * So make either a join, if not that a select, if not that a scan
 		 */
 
 		tableName = tableN.getWholeTableName();
+		if(tableName.substring(0, 1).equals("."))
+		{
+			tableName = tableName.substring(1);
+		}
 		table = tableN;
+
 		//writer = null;
 
 		tableR = (tableProperties) dbcat.getTableCatalog().get(tableName);
+
+
 		for(int i =0; i<tableR.getColumns().size(); i++)
 		{
-			if(tableN.getAlias()!=null)
+			if(tableN.getAlias()!=null){
 				columnList.add(tableN.getAlias() + "." +tableR.getColumns().get(i));
-			else
-				columnList.add(tableN.getWholeTableName() + "." + tableR.getColumns().get(i));
+			}
+			else{
+				if(tableN.getWholeTableName().substring(0, 1).equals("."))
+				{
+					System.out.println("I am coming to this thing");
+					columnList.add(tableN.getWholeTableName().substring(1) + "." + tableR.getColumns().get(i));
+				}
+				else{
+
+					columnList.add(tableN.getWholeTableName() + "." + tableR.getColumns().get(i));
+				}			
+			}
+			
 		}
+		
 
 		if(joinList!=null){
 			for(int i =0; i <joinList.size(); i++)
@@ -143,15 +177,21 @@ public class ProjectOperator extends Operator {
 			//child=new JoinOperatorSuper(tableN, joinList, select);
 
 		}
-	//	else if (select != null) {
+		//	else if (select != null) {
 		//	child = new SelectOperator(tableN, select);
 
 		//}
 		//else {
-			//child = new scanOperator(tableN);
+		//child = new scanOperator(tableN);
 
 		//}
+		if(items!=null){
 		this.items = items;
+		}
+		else{
+			this.items = new ArrayList<SelectItem>();
+			this.items.add(asterik);
+		}
 
 
 
@@ -171,7 +211,7 @@ public class ProjectOperator extends Operator {
 	{
 		return columnList;
 	}
-	
+
 	/**
 	 * getNextTuple() returns the next tuple of this scan operator, or an ENDOFFILE object if there are no more tuples
 	 * @returns returnedTuple
@@ -182,11 +222,10 @@ public class ProjectOperator extends Operator {
 		if (child instanceof SelectOperator)
 			System.out.println("selectoperator");
 		Tuple returnedTuple = child.getNextTuple();
-System.out.println("Do i get to this thing?");
+		System.out.println(returnedTuple.getValues());
 		if(items.get(0) instanceof AllColumns)
 		{
-			System.out.println("Do i get to this thingz2?");
-			
+
 			return returnedTuple;
 		}
 		else if(returnedTuple !=null)
@@ -207,13 +246,13 @@ System.out.println("Do i get to this thing?");
 				{
 					String colName = ((Column)((SelectExpressionItem) items.get(i)).getExpression()).toString();
 					int x = (int) returnedTuple.getValues().get(colName);
-                  
+
 					tupleSet.put(colName, x);
 				}
-				  if(returnedTuple.getTable()!=null)
-	                    finalTuple.setName(returnedTuple.getTable());
+				if(returnedTuple.getTable()!=null)
+					finalTuple.setName(returnedTuple.getTable());
 				finalTuple.setValues(tupleSet);
-				
+
 				return finalTuple;
 			}
 		}
@@ -222,7 +261,7 @@ System.out.println("Do i get to this thing?");
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Dump prints out every tuple from the scan
 	 * @throws IOException 
@@ -230,8 +269,8 @@ System.out.println("Do i get to this thing?");
 	//@Override
 	public void dump() throws IOException
 	{
- 		Tuple returnedTuple = getNextTuple();
- 		while(true)
+		Tuple returnedTuple = getNextTuple();
+		while(true)
 		{  			
 			if(returnedTuple == null)
 			{
@@ -248,10 +287,10 @@ System.out.println("Do i get to this thing?");
 				else
 				{	
 					System.out.println("item is null");
-			
-				
+
+
 					if(!(items.get(0) instanceof AllColumns)){
- 						ArrayList<String> itemsActual = new ArrayList<String>();
+						ArrayList<String> itemsActual = new ArrayList<String>();
 						for(int i =0; i < items.size()-1; i++)
 						{
 							String colName = ((Column)((SelectExpressionItem) items.get(i)).getExpression()).toString();
@@ -281,7 +320,7 @@ System.out.println("Do i get to this thing?");
 						//returnedTuple.setOutputOrder(columnList);
 					}
 				}
-				
+
 				//writer.writeTuple(returnedTuple);
 			}
 		}
@@ -298,6 +337,6 @@ System.out.println("Do i get to this thing?");
 	@Override
 	public void reset(int index) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

@@ -32,6 +32,10 @@ public class scanOperator extends Operator{
 	{
 		alias = tableN.getAlias();
 		table = tableN.getWholeTableName();
+		if(table.substring(0,1).equals("."))
+		{
+			table = table.substring(1);
+		}
 		tableR = (tableProperties) dbcat.getTableCatalog().get(table);
 		fileUrl = tableR.getUrl();
 		
