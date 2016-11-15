@@ -41,8 +41,15 @@ public class TreeDeserializer {
 	private Integer highkey;
 	
 	
-	/*
-	 * Constructor for a treeDeserializer object on a given index file. 
+	/**
+	 * The constructor also finds the LeafPage where the lowkey value is present (if lowkey exists)
+	 * or defaults to leaf page 1. It sets the global currLeaf to the LeafNode where lowkey is present,
+	 * and saves the pageAddr of this LeafNode into currLeafNodeaddr. 
+	 * 
+	 * @param indexFile the index file to be deserialized
+	 * @param lowkey the lower scan boundary, null if not needed
+	 * @param highkey the upper scan boundary, null if not needed
+	 * @throws IOException
 	 */
 	public TreeDeserializer(File indexFile, Integer lowkey, Integer highkey) throws IOException{
 		
@@ -62,11 +69,13 @@ public class TreeDeserializer {
 	}
 	
 	
-	/*
-	Navigate root-to-leaf to find lowkey (or where lowkey would be if it were in the tree, 
-	since it may not be present) and grab the next data entry from the leaf.
-	*/
-	
+	/**
+	 * Navigate root-to-leaf to find lowkey (or where lowkey would be if it were in the tree, 
+	 *	since it may not be present) and grab the next data entry from the leaf.
+	 * @param lowkey the lowkey boundary, null if not needed
+	 * @return LeafNode that contains the lowkey, or contains the range where lowkey falls between.
+	 * @throws IOException
+	 */
 	private LeafNode findLowKey(Integer lowkey) throws IOException{
 		
 		//no lower bound, return very first leaf
@@ -236,6 +245,7 @@ public class TreeDeserializer {
 	/**
 	 * Sets global currLeaf to the next leaf node, and
 	 * updates the keys enum and currkey to the first key in the enum.
+	 * If we reach the last of the leaf nodes, it will set CurrLeaf to null
 	 * 
 	 * @throws IOException
 	 */
@@ -264,7 +274,7 @@ public class TreeDeserializer {
 	public RId getNextRId() throws IOException {
 		
 		
-		//First call, initialize keys.
+		//On the first call, initialize keys.
 		//Find the first key that is greater than or equal to lowkey
 		if (keys == null){
 			keys = currLeaf.getDataEntry().keys();
