@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class TreeSerializer {
 	BPlusTree tree;
@@ -72,14 +73,22 @@ public class TreeSerializer {
 					currentByte+=4;
 					buffer.putInt(currentByte, leafs.get(i).getDataEntry().keySet().size());
 					currentByte+=4;
+					
 					Object[] keyArray = leafs.get(i).getDataEntry().keySet().toArray();
-					for(int j=0; j<keyArray.length; j++)
+					ArrayList<Integer> keys = new ArrayList<Integer>();
+					for(int j =0; j< keyArray.length; j++)
 					{
-						buffer.putInt(currentByte, (int) keyArray[j]);
+					   keys.add((int)keyArray[j]);
+					}
+					Collections.sort(keys);
+					for(int j=0; j<keys.size(); j++)
+					{
+						buffer.putInt(currentByte, keys.get(j));
 						currentByte+=4;
-						ArrayList<RId> pT = leafs.get(i).getDataEntry().get(keyArray[j]);
+						ArrayList<RId> pT = leafs.get(i).getDataEntry().get(keys.get(j));
 
 						buffer.putInt(currentByte, pT.size()); 
+						currentByte+=4;
 						// puts the size of rids for that specific key
 						for(int p = 0; p< pT.size(); p++)
 						{
@@ -89,8 +98,63 @@ public class TreeSerializer {
 							currentByte+=4;
 
 						}
+						leafs.get(i).pageNumber = currentPage;
+
 					}
                    finishWriting();
+				}
+			}
+			for(int i =0; i<firstIndexLevel.size(); i++)
+			{
+				
+				if(currentByte == 0){
+					firstIndexLevel.get(i).pageNumber= currentPage;
+
+					buffer.putInt(currentByte, 1);
+					currentByte+=4;
+					buffer.putInt(currentByte, firstIndexLevel.get(i).getKeys().size());
+					currentByte+=4;
+					ArrayList<Integer> keys = firstIndexLevel.get(i).getKeys();
+					ArrayList<TreeNode> children = firstIndexLevel.get(i).getChildren();
+					Collections.sort(keys);
+					for(int j =0; j< keys.size(); j++)
+					{
+						buffer.putInt(currentByte, keys.get(j));
+						currentByte+=4;
+					}
+					for(int j=0; j<children.size(); j++)
+					{
+						buffer.putInt(currentByte, ((LeafNode)children.get(j)).pageNumber);
+						currentByte+=4;
+					}
+					finishWriting();
+				}
+			}
+			for(int i = 0; i<indexNodeLayering.size(); i++)
+			{
+				for(int j =0; j<indexNodeLayering.get(i).size(); j++)
+				{
+					if(currentByte == 0)
+					{
+						indexNodeLayering.get(i).get(j).pageNumber = currentPage;
+						buffer.putInt(currentByte,1);
+						currentByte+=4;
+						buffer.putInt(currentByte, indexNodeLayering.get(i).get(j).getKeys().size());
+						currentByte+=4;
+						ArrayList<Integer> keys = indexNodeLayering.get(i).get(j).getKeys();
+						ArrayList<TreeNode> children = indexNodeLayering.get(i).get(j).getChildren();
+						Collections.sort(keys);
+						for(int p=0; p< keys.size(); p++)
+						{
+							buffer.putInt(currentByte, keys.get(p));
+							currentByte+=4;
+						}
+						for(int p =0; p < children.size(); p++){
+							buffer.putInt(currentByte, ((IndexNode)children.get(p)).pageNumber);
+							currentByte+=4;
+						}
+						finishWriting();
+					}
 				}
 			}
 		}

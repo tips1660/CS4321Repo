@@ -4,23 +4,9 @@ import java.util.ArrayList;
 
 public class IndexNode extends TreeNode{
 	ArrayList<TreeNode> children = new ArrayList<TreeNode>();
-	
-	//Child pages keeps track of the page number of each new node being pointed to
-	ArrayList<Integer> childPages = new ArrayList<Integer>();
-	
 	ArrayList<Integer> keys = new ArrayList<Integer>();
-
     int smallest  = Integer.MAX_VALUE;
     public int pageNumber;
-    
-    public void setChildPages(ArrayList<Integer> childpages){
-    	this.childPages = childpages;
-    }
-    
-    public ArrayList<Integer> getChildPages(){
-    	return childPages;
-    }
-    
 	public ArrayList<TreeNode> getChildren() {
 		return children;
 	}
@@ -35,13 +21,13 @@ public class IndexNode extends TreeNode{
 	}
 	@Override
 	public int getSmallestKey() {
-		 for(int i =0; i < keys.size(); i ++)
-		 {
-			 if(keys.get(i) < smallest)
-				 smallest = keys.get(i);
-			 
-		 }
+		 
 		 return smallest;
+	}
+	public void setSmallestKey(int smallestKey) {
+		// TODO Auto-generated method stub
+		this.smallest = smallestKey;
+		
 	}
 	
 	

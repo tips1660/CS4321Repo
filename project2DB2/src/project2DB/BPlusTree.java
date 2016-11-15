@@ -37,6 +37,7 @@ public class BPlusTree {
 		while(ctr < buffer.size())
 		{
 			initializeLeafNodes();
+			sortLeafs();
 		}
 		while(continueCreateIndexNodes)
 		{
@@ -47,8 +48,8 @@ public class BPlusTree {
 			initialIndexNodesReal();
 		}
 		root = indexLayersReal.get(indexLayersReal.size()-1).get(0);
-		printLeafsSecond();	 
-		//printIndices(); 	
+		//printLeafs();	 
+		printIndices(); 	
 		//printRealIndices();
 	}
 	// call this repeatedly till ctr = buffer size
@@ -60,6 +61,7 @@ public class BPlusTree {
 		{  
 
 			node.getChildren().add(indexLayer.get(lastIndex));
+			node.setSmallestKey(indexLayer.get(lastIndex).getSmallestKey());
 			lastIndex++;
 
 			while(lastIndex < indexLayer.size())
@@ -75,7 +77,7 @@ public class BPlusTree {
 					break;
 				}
 			}
-			if(indexLayersReal.size() > 0)
+			if(indexLayersReal.size() > arrayPtr)
 			{
 				indexLayersReal.get(0).add(node);
 			}
@@ -91,7 +93,6 @@ public class BPlusTree {
 		}
 		else{
 			if(indexLayersReal.get(arrayPtr-1).size() == 1){
-				System.out.println("I got to this setting");
 				stopIndexingLayeringReal = true;
 			}
 			else{
@@ -137,14 +138,16 @@ public class BPlusTree {
 	public void initializeIndexNodes()
 	{	IndexNode node = new IndexNode();
 
-	node.getChildren().add(leafLayer.get(indexCtr));
-	indexCtr++;
+	
 
 
 	numChildrenToBeAdded = leafLayer.size()-indexCtr;
 	if((numChildrenToBeAdded < (3 * order + 2)) && (numChildrenToBeAdded > (2 * order +1)))
 	{
- 		while(mCtr < numChildrenToBeAdded/2)
+		node.getChildren().add(leafLayer.get(indexCtr));
+		node.setSmallestKey(leafLayer.get(indexCtr).getSmallestKey());
+		indexCtr++;
+ 		while(mCtr < (numChildrenToBeAdded/2)-1)
 		{
 			node.getKeys().add(leafLayer.get(indexCtr).getSmallestKey());
 			node.getChildren().add(leafLayer.get(indexCtr));
@@ -154,6 +157,9 @@ public class BPlusTree {
 		indexLayer.add(node);
 		node = new IndexNode();
 		mCtr=0;
+		node.getChildren().add(leafLayer.get(indexCtr));
+		node.setSmallestKey(leafLayer.get(indexCtr).getSmallestKey());
+		indexCtr++;
 		while(indexCtr < leafLayer.size())
 		{
 			node.getKeys().add(leafLayer.get(indexCtr).getSmallestKey());
@@ -166,6 +172,9 @@ public class BPlusTree {
 	}
 	else
 	{
+		node.getChildren().add(leafLayer.get(indexCtr));
+		node.setSmallestKey(leafLayer.get(indexCtr).getSmallestKey());
+		indexCtr++;
 		while(indexCtr< leafLayer.size()){
 			if(node.getKeys().size() < (2 * order) )
 			{   
@@ -202,6 +211,7 @@ public class BPlusTree {
 				node = updateNode(node,kConditionCheck);
 
 			}
+			
 			leafLayer.add(node);
 			breakCondition = false;
 		}
@@ -293,6 +303,17 @@ public class BPlusTree {
 		return node;
 	}
 
+	 public void sortLeafs()
+	 {
+		 for(int i =0; i< leafLayer.size(); i++)
+		 {
+			 Object[] keys = leafLayer.get(i).getDataEntry().keySet().toArray();
+			 for(int j =0; j<keys.length; j++)
+			 {
+				 leafLayer.get(i).sort((int)keys[j]);
+			 }
+		 }
+	 }
 	public boolean kCondition()
 	{
 		if(uniqueKeysLeft < (3 * order) && uniqueKeysLeft > (2 * order))
@@ -328,19 +349,24 @@ public class BPlusTree {
 			int keyTotal = indexLayer.get(i).getKeys().size();
 			System.out.println("for index node: " + (i+1) + " I have this many keys: " + keyTotal + " with 2*order being: " + (2*order));
 			accumulator += indexLayer.get(i).getChildren().size();
+			System.out.println("with index node: "  + (i+1) + " taken  into account I have: " + accumulator + "children.");
 
 		}
-		System.out.print("Here are all the keys on my first object");
-		for(int i =0; i<indexLayer.get(0).getKeys().size(); i++)
-		{
-			System.out.print(indexLayer.get(0).getKeys().get(i) + " ");
-		}
-
+		
+        for(int i =0; i< indexLayer.size(); i++)
+        {
+        	System.out.print("Here are all the keys for this index node: ");
+        	for(int j =0; j<indexLayer.get(i).getKeys().size(); j++){
+        		System.out.print(indexLayer.get(i).getKeys().get(j) + ", ");
+        	}
+        	System.out.println();
+        	
+        }
+        
 		System.out.println();
 		LeafNode t=  new LeafNode();
 		LeafNode p = ((LeafNode)(indexLayer.get(0).getChildren().get(0)));
-		if(p.getDataEntry().containsKey(0))
-			System.out.println("haha had 0!");
+	
 		System.out.println("In total, I have these many leaves accounted for: " + accumulator);
 		System.out.println("my k was: " + k);
 		System.out.println("but my buffer size was: " + buffer.size());
@@ -372,6 +398,7 @@ public class BPlusTree {
 		for(int i =0; i< leafLayer.size(); i++)
 		{
 			leafLayer.get(i).printStuff();
+			System.out.println();
 		}
 	}
 	public IndexNode getRoot()
