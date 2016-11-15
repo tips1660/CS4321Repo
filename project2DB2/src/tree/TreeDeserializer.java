@@ -52,10 +52,16 @@ public class TreeDeserializer {
 			//
 			
 			deserializePage(rootAddress);
-			//IndexNode root = deserializePage(rootAddress);
-			//TreeNode curr = root;
-			//pageAddr = 1;
-			/**
+			IndexNode root = deserializePage(rootAddress);
+			TreeNode curr = root;
+			pageAddr = 1;
+			/*
+			while (curr instanceof IndexNode){
+				IndexNode currIndex = (IndexNode) curr;
+				int page = Collections.binarySearch(currIndex,lowkey+1);
+				
+			}
+			
 			 * while curr is an Index Node
 			 * 		deserialize it
 			 * 		Binary search through keys of index to find which path to traverse
@@ -72,18 +78,18 @@ public class TreeDeserializer {
 	}
 	
 	
-	private void deserializePage(Integer i) throws IOException{
+	private TreeNode deserializePage(Integer i) throws IOException{
 		getPage(i);
 		
 		//0 leaf 1 index
 		int nodeType = buffer.get(0);
 		
-		if (nodeType == 1) deserializeIndex();
-		else deserializeLeaf();
+		if (nodeType == 1) return deserializeIndex();
+		else return deserializeLeaf();
 	
 	}
 
-	private void deserializeIndex(){
+	private IndexNode deserializeIndex(){
 		int numkeys = buffer.getInt(4);
 		int pointer = 8;
 		
@@ -102,6 +108,11 @@ public class TreeDeserializer {
 			pointer+=4;
 		}
 		
+		IndexNode n = new IndexNode();
+		n.setKeys(keys);
+		
+		//children?
+		
 	}
 	
 	/**
@@ -110,13 +121,15 @@ public class TreeDeserializer {
 	 * Precondition: Correct page is already loaded into the buffer.
 	 * @return Data Structure containing deserialized data entries of a leaf page in the buffer.
 	 */
-	private Map<Integer,Map<Integer,Integer>> deserializeLeaf(){
+	private LeafNode deserializeLeaf(){
+		
 		int pointer = 4;
 		int numdata = buffer.getInt(pointer);
 		pointer+=4;
 		int processed = 0;
 		
-		HashMap<Integer,Map<Integer,Integer>> dataEntries = new HashMap<Integer,Map<Integer,Integer>>();
+		Hashtable<Integer,List<RId>> dataEntries = new Hashtable<Integer,List<RId>>();
+		
 		while (processed < numdata){
 			int key = buffer.getInt(pointer);
 			pointer+=4;
@@ -124,17 +137,17 @@ public class TreeDeserializer {
 			pointer+=4;
 			int processed_rids = 0;
 			
-			HashMap<Integer,Integer> pairs = new HashMap<Integer,Integer>();
+			ArrayList<RId> rids = new ArrayList<RId>();
 			
 			while (processed_rids < num_rids){
 				int p = buffer.getInt(pointer);
 				pointer+=4;
 				int t = buffer.getInt(pointer);
 				pointer+=4;
-				pairs.put(p,t);
+				pairs.put(new RId(p,t));
 				processed_rids++;
 			}
-			dataEntries.put(key,pairs);
+			dataEntries.put(key,rids);
 			processed++;	
 		}
 		return dataEntries;
