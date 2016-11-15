@@ -37,6 +37,7 @@ public class BPlusTree {
 		while(ctr < buffer.size())
 		{
 			initializeLeafNodes();
+			sortLeafs();
 		}
 		while(continueCreateIndexNodes)
 		{
@@ -47,9 +48,9 @@ public class BPlusTree {
 			initialIndexNodesReal();
 		}
 		root = indexLayersReal.get(indexLayersReal.size()-1).get(0);
-		printLeafs();
-		printIndices(); 	
-		printRealIndices();
+		printLeafsSecond();	 
+		//printIndices(); 	
+		//printRealIndices();
 	}
 	// call this repeatedly till ctr = buffer size
 	public void initialIndexNodesReal()
@@ -202,6 +203,7 @@ public class BPlusTree {
 				node = updateNode(node,kConditionCheck);
 
 			}
+			
 			leafLayer.add(node);
 			breakCondition = false;
 		}
@@ -293,6 +295,17 @@ public class BPlusTree {
 		return node;
 	}
 
+	 public void sortLeafs()
+	 {
+		 for(int i =0; i< leafLayer.size(); i++)
+		 {
+			 Object[] keys = leafLayer.get(i).getDataEntry().keySet().toArray();
+			 for(int j =0; j<keys.length; j++)
+			 {
+				 leafLayer.get(i).sort((int)keys[j]);
+			 }
+		 }
+	 }
 	public boolean kCondition()
 	{
 		if(uniqueKeysLeft < (3 * order) && uniqueKeysLeft > (2 * order))
@@ -330,17 +343,20 @@ public class BPlusTree {
 			accumulator += indexLayer.get(i).getChildren().size();
 
 		}
-		System.out.print("Here are all the keys on my first object");
-		for(int i =0; i<indexLayer.get(0).getKeys().size(); i++)
-		{
-			System.out.print(indexLayer.get(0).getKeys().get(i) + " ");
-		}
-
+		
+        for(int i =0; i< indexLayer.size(); i++)
+        {
+        	System.out.print("Here are all the keys for this index node: ");
+        	for(int j =0; j<indexLayer.get(i).getKeys().size(); j++){
+        		System.out.print(indexLayer.get(i).getKeys().get(j) + ", ");
+        	}
+        	System.out.println();
+        	
+        }
 		System.out.println();
 		LeafNode t=  new LeafNode();
 		LeafNode p = ((LeafNode)(indexLayer.get(0).getChildren().get(0)));
-		if(p.getDataEntry().containsKey(0))
-			System.out.println("haha had 0!");
+	
 		System.out.println("In total, I have these many leaves accounted for: " + accumulator);
 		System.out.println("my k was: " + k);
 		System.out.println("but my buffer size was: " + buffer.size());
@@ -365,6 +381,14 @@ public class BPlusTree {
 			System.out.println("the total number of things in this level that I have are: " + indexLayersReal.get(i).size());
 			System.out.println("the total number of index nodes I have as kids on level: " + i + " are: " + accumulator);
 			System.out.println("the total number of keys I have across my different index nodes on level: " + i + "are: " + keys);
+		}
+	}
+	public void printLeafsSecond()
+	{
+		for(int i =0; i< leafLayer.size(); i++)
+		{
+			leafLayer.get(i).printStuff();
+			System.out.println();
 		}
 	}
 	public IndexNode getRoot()

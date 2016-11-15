@@ -35,7 +35,7 @@ public class parserTest {
 	static ExpressionTester  k = new ExpressionTester();
 
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		// in the readme write that this is hard coded, and that externalsortoperator works, but not with smj. Also we cannot delete files on some computers
 		File config = new File(args[0]);
 		FileReader cReader = new FileReader(config);
@@ -101,11 +101,13 @@ public class parserTest {
 			String table = split_line[0];
 			String attribute = split_line[1];
 			int clustered = Integer.parseInt(split_line[2]);
+			String indexName = table+ "." + attribute;
 			int order = Integer.parseInt(split_line[3]);
+			String indexOut = data[2] + File.separator + indexName;
 			if(buildIndex == 1)
 			{
 				
-				IndexBuilder indexBuild = new IndexBuilder(clustered,"", table, schema.getName(), attribute, order);
+				IndexBuilder indexBuild = new IndexBuilder(clustered,indexOut, table, schema.getName(), attribute, order);
 			}
 			//Use these four values as arguments to construct your new B+ tree
 			//Make sure that buildIndex outputs final trees into input/db/indexes/

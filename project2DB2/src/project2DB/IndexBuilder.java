@@ -28,7 +28,7 @@ public class IndexBuilder {
 	/*
 	 * Build a sort operator, scan the table you want, sort based on the attribute, and then get the buffer.
 	 */
-	public IndexBuilder(int clustered, String out, String table, String schema, String attribute, int d) throws IOException
+	public IndexBuilder(int clustered, String out, String table, String schema, String attribute, int d) throws Exception
 	{
 		key = table + "." + attribute;
 		this.clustered= clustered;
@@ -50,7 +50,7 @@ public class IndexBuilder {
 		System.out.println("this is how many unique S.A there are: " + totalUnique.keySet().size());
 		indexTree = new BPlusTree(tupleBuffer, key, d, totalUnique.keySet().size());
 		
-		TreeSerializer serialize = new TreeSerializer(indexTree, d);
+		TreeSerializer serialize = new TreeSerializer(indexTree, d, out);
 		
 	}
 	public BPlusTree getTree()
