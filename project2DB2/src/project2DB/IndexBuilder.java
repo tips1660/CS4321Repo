@@ -50,6 +50,7 @@ public class IndexBuilder {
 		System.out.println("this is how many unique S.A there are: " + totalUnique.keySet().size());
 		indexTree = new BPlusTree(tupleBuffer, key, d, totalUnique.keySet().size());
 		
+		TreeSerializer serialize = new TreeSerializer(indexTree, d);
 		
 	}
 	public BPlusTree getTree()

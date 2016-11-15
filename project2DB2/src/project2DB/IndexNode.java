@@ -6,6 +6,7 @@ public class IndexNode extends TreeNode{
 	ArrayList<TreeNode> children = new ArrayList<TreeNode>();
 	ArrayList<Integer> keys = new ArrayList<Integer>();
     int smallest  = Integer.MAX_VALUE;
+    public int pageNumber;
 	public ArrayList<TreeNode> getChildren() {
 		return children;
 	}
