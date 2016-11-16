@@ -108,6 +108,7 @@ public class JoinOperatorSuper extends Operator {
 				if (newChild) {
 					leftOp.setChild(op);
 				}
+				visitor.reset();
 			}
 		}
 
@@ -147,7 +148,39 @@ public class JoinOperatorSuper extends Operator {
 				}
 			}
 			else{
-				SelectOperator leftSelectOp = new SelectOperator(tableN, leftExp);
+				Operator leftSelectOp = null;
+				if (u == 0) {
+					leftSelectOp = new SelectOperator(tableN, leftExp);
+				}
+				else {
+					String index = visitor.setIndex(tableN.getWholeTableName());
+					leftExp.accept(visitor);
+					visitor.buildExpressions();
+					boolean newChild = false;
+					boolean fullIndex = false;
+					IndexScanOperator op = null;
+					if (!visitor.getIndexArray().isEmpty()) {
+						newChild = true;
+						int cluster = visitor.setCluster(index);
+						File f = visitor.getFile();
+						op = new IndexScanOperator(tableN, f, index, cluster, visitor.getLow(), visitor.getHigh());
+						if (visitor.getNotIndexExpression() != null) {
+							leftExp = visitor.getNotIndexExpression();
+						}
+						else {
+							newChild = false;
+							fullIndex = true;
+							leftSelectOp = op;
+						}
+					}
+					if (!fullIndex) {
+						leftSelectOp = new SelectOperator(tableN, leftExp);
+					}
+					if (newChild) {
+						leftSelectOp.setChild(op);
+					}
+					visitor.reset();
+				}
 				ProjectOperator projectLeft  = new ProjectOperator( items1,jList, tableN);
 				projectLeft.setChild(leftSelectOp);
  					if(st == 0)
@@ -176,10 +209,10 @@ public class JoinOperatorSuper extends Operator {
 
 			//System.out.println("correctly building this right?");
 			if(st==0)
-			joinOpSMJ = new SMJOperator(leftOpSort, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, false);
+			joinOpSMJ = new SMJOperator(leftOpSort, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, false, u);
 			else{
 				//System.out.println("JOINCODEV3: SHOULD HAVE MADE A SMJ WITH EX SET TO TRUE");
-				joinOpSMJ = new SMJOperator(leftOpSort, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, true);
+				joinOpSMJ = new SMJOperator(leftOpSort, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, true, u);
 			}
 
 			
@@ -223,7 +256,7 @@ public class JoinOperatorSuper extends Operator {
 					joinTreeLeft.addToSortListActual(leftJoinExpR);
 					joinTreeLeft.setChild(lastJoinProject);
 					((SortOperator) joinTreeLeft).setupBuffer();
-					joinOpSMJ = new SMJOperator(joinTreeLeft, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, false);
+					joinOpSMJ = new SMJOperator(joinTreeLeft, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, false, u);
 					System.out.println("made that thing up");
 				}
 				else
@@ -237,7 +270,7 @@ public class JoinOperatorSuper extends Operator {
 					joinTreeLeft.setChild(lastJoinProject);
 					joinTreeLeft.setTable(joinOpSMJ.getTableName());
 					System.out.println("left op should be ready");
-					joinOpSMJ = new SMJOperator(joinTreeLeft, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, true);
+					joinOpSMJ = new SMJOperator(joinTreeLeft, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, true, u);
 					ctr++;
 				}
 			}

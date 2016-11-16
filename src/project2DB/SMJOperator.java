@@ -1,5 +1,6 @@
 package project2DB;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,12 +42,15 @@ public class SMJOperator extends Operator {
 	private List<Join> joinList;
 	ArrayList<SelectItem> items1;
 	private Hashtable<Integer, Tuple> tupleBuffer = new Hashtable<Integer, Tuple>();
+	int u;
+	IndexVisitor visitor = new IndexVisitor();
 
-	public SMJOperator(SortOperatorParent lOp, List<Join> jList, HashMap<String, Expression> solo, HashMap<String, Expression> join, ArrayList<Expression> rejected,int j2, int ctr, String tempDir, boolean exTF) throws IOException {
+	public SMJOperator(SortOperatorParent lOp, List<Join> jList, HashMap<String, Expression> solo, HashMap<String, Expression> join, ArrayList<Expression> rejected,int j2, int ctr, String tempDir, boolean exTF, int u) throws IOException {
 		joinList = jList;
 		items1 = new ArrayList<SelectItem>();//just holds  a single instance of all columns since the real selection happens in the real project.
 		AllColumns allcolplaceholder= new AllColumns();
 		items1.add(allcolplaceholder);
+		this.u = u;
 		leftOp = lOp;
 		soloMap = solo;
 		joinMap = join;
@@ -97,7 +101,43 @@ public class SMJOperator extends Operator {
 		}
 		else{
 			System.out.println("did i get into this thing? my right exp is: " + rightExp );
-			SelectOperator rightSelectOp = new SelectOperator(((Table)joinList.get(0).getRightItem()), rightExp);
+			Operator rightSelectOp = null;
+			if (u == 0) {
+				rightSelectOp = new SelectOperator(((Table)joinList.get(0).getRightItem()), rightExp);
+			}
+			else {
+				String t = ((Table)joinList.get(0).getRightItem()).getWholeTableName();
+				String index = visitor.setIndex(t);
+				rightExp.accept(visitor);
+				visitor.buildExpressions();
+				boolean newChild = false;
+				boolean fullIndex = false;
+				IndexScanOperator op = null;
+				if (!visitor.getIndexArray().isEmpty()) {
+					newChild = true;
+					int cluster = visitor.setCluster(index);
+					File f = visitor.getFile();
+					try {
+						op = new IndexScanOperator((Table)joinList.get(0).getRightItem(), f, index, cluster, visitor.getLow(), visitor.getHigh());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					if (visitor.getNotIndexExpression() != null) {
+						rightExp = visitor.getNotIndexExpression();
+					}
+					else {
+						newChild = false;
+						fullIndex = true;
+						rightSelectOp = op;
+					}
+				}
+				if (!fullIndex) {
+					rightSelectOp = new SelectOperator((Table)joinList.get(0).getRightItem(), rightExp);
+				}
+				if (newChild) {
+					rightSelectOp.setChild(op);
+				}
+			}
 			ProjectOperator projectRight  = new ProjectOperator( items1,joinList, ((Table)joinList.get(0).getRightItem()));
 			projectRight.setChild(rightSelectOp);
 

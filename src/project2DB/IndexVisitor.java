@@ -70,6 +70,14 @@ public class IndexVisitor implements ExpressionVisitor {
 		return isIndex;
 	}
 	
+	public void reset()
+	{
+		indexExpression = null;
+		notIndexExpression = null;
+		indexExp.clear();
+		notIndexExp.clear();
+	}
+	
 	public File getFile()
 	{
 		return f;
