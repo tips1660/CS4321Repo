@@ -9,6 +9,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -29,7 +30,8 @@ public class JoinOperatorSuper extends Operator {
 	private List<Join> joinList;
 	private Operator joinOp;
 	int jCondition;
-	private SMJOperator joinOpSMJ;
+	//TODO changed this 
+	private Operator joinOpSMJ;
 	Expression expression;
 	Expression leftExp;
 	Operator leftOp;
@@ -67,7 +69,7 @@ public class JoinOperatorSuper extends Operator {
 		if (leftJoinExp == null) {
 
 			if (!rejectedJoins.isEmpty()) {
-				leftJoinExp = (BinaryExpression) rejectedJoins.get(0);
+				leftJoinExp = (BinaryExpression) rejectedJoins.remove(0);
 
 			}
 
@@ -185,7 +187,7 @@ public class JoinOperatorSuper extends Operator {
 				projectLeft.setChild(leftSelectOp);
  					if(st == 0)
  					{
- 						 leftOpSort = new SortOperator(items1, null);
+ 						leftOpSort = new SortOperator(items1, null);
  						leftOpSort.addToSortListActual(leftJoinExpR);
  						leftOpSort.setTable(tableN);
  						leftOpSort.setChild(projectLeft);
@@ -239,20 +241,21 @@ public class JoinOperatorSuper extends Operator {
 				if (leftJoinExp == null) {
 
 					if (!rejectedJoins.isEmpty()) {
-						leftJoinExp = (BinaryExpression) rejectedJoins.get(0);
+						leftJoinExp = (BinaryExpression) rejectedJoins.remove(0);
 
 					}
 
 				}
-				
-				ProjectOperator lastJoinProject = new ProjectOperator(items1,jList, joinOpSMJ.getTableName());
+				//TODO: changed this
+				ProjectOperator lastJoinProject = new ProjectOperator(items1,jList, ((SMJOperator) joinOpSMJ).getTableName());
                 
 				lastJoinProject.setChild(joinOpSMJ);
 				leftJoinExpR = ((EqualsTo) leftJoinExp).getLeftExpression().toString();
 				System.out.println("i'm over before the choice now");
 				if(st==0){
 					joinTreeLeft = new SortOperator(items1, null);
-					joinTreeLeft.setTable(joinOpSMJ.getTableName());
+					//TODO added thsi
+					joinTreeLeft.setTable(((SMJOperator) joinOpSMJ).getTableName());
 					joinTreeLeft.addToSortListActual(leftJoinExpR);
 					joinTreeLeft.setChild(lastJoinProject);
 					((SortOperator) joinTreeLeft).setupBuffer();
@@ -268,11 +271,40 @@ public class JoinOperatorSuper extends Operator {
 					//got rido f the table setting
 					joinTreeLeft.addToSortListActual(leftJoinExpR);
 					joinTreeLeft.setChild(lastJoinProject);
-					joinTreeLeft.setTable(joinOpSMJ.getTableName());
+					//TODO added this
+					joinTreeLeft.setTable(((SMJOperator) joinOpSMJ).getTableName());
 					System.out.println("left op should be ready");
 					joinOpSMJ = new SMJOperator(joinTreeLeft, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, true, u);
 					ctr++;
 				}
+			}
+		}
+		//added this section
+		if (!rejectedJoins.isEmpty()) {
+			System.out.println("RejectedJoins is not empty...");
+			System.out.println(rejectedJoins.get(0));
+			Expression extra = null;
+			if (rejectedJoins.size() >= 2) {
+				extra = new AndExpression();
+				((BinaryExpression) extra).setLeftExpression(rejectedJoins.get(0));
+				((BinaryExpression) extra).setRightExpression(rejectedJoins.get(1));
+				for (int i = 2; i < rejectedJoins.size(); i++) {
+					((BinaryExpression) extra).setLeftExpression(extra);
+					((BinaryExpression) extra).setRightExpression(rejectedJoins.get(i));
+				}
+			}
+			else {
+				extra = rejectedJoins.get(0);
+			}
+			
+			if (j1 != 2) {
+				Operator temp = joinOp;
+				joinOp = new SelectOperator(extra);
+				joinOp.setChild(temp);
+			}
+			else {
+				Operator temp = joinOpSMJ;
+				joinOpSMJ = new SelectOperator(extra);
 			}
 		}
 	}
