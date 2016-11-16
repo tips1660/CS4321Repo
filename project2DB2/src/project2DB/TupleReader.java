@@ -69,6 +69,7 @@ public class TupleReader {
     public int getNextPage() throws IOException {
     	tupleNum=-1;
     	currentPage+=1;
+    	currentTuple = 0;
     	buffer.clear();
     	int numBytes = fc.read(buffer);
     	//System.out.println("getNextPage was called");

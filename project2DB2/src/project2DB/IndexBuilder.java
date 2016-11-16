@@ -30,6 +30,8 @@ public class IndexBuilder {
 	 */
 	public IndexBuilder(int clustered, String out, String table, String schema, String attribute, int d) throws Exception
 	{
+		// need to add another attribute to tell me the file location of the table if clutsering so i can rewrite
+		
 		key = table + "." + attribute;
 		this.clustered= clustered;
 		tableSorter = new SortOperator(null, null);

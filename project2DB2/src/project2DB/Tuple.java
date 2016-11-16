@@ -17,7 +17,8 @@ public class Tuple{
 	private TupleReader reader;
 	private ArrayList<String> itemList = new ArrayList<String>();
 	private int page;
-	private int tupleNum;
+	private int tupleNum;	
+
 	
 	/*
 	 * Deprecated
@@ -38,20 +39,6 @@ public class Tuple{
 		}
 	}
 	
-	public Tuple (String tableName, String alias, TupleReader r, RId rid){
-		try{
-
-			tableProperties table = (tableProperties) cat.getTableCatalog().get(tableName);
-			reader = r;
-			table2  = tableName;
-			parse(table, alias,rid);
-		}
-		catch(Exception e){
-			System.out.println("Index Scan: Table does not exist");
-			System.out.println(e);
-		}
-	}
-	
 	public Tuple(String tableName, String alias, TupleReader r) {
 		try{
 
@@ -63,6 +50,19 @@ public class Tuple{
 		}
 		catch(Exception e){
 			System.out.println("Table does not exist2");
+			System.out.println(e);
+		}
+	}
+	public Tuple (String tableName, String alias, TupleReader r, RId rid){
+		try{
+
+			tableProperties table = (tableProperties) cat.getTableCatalog().get(tableName);
+			reader = r;
+			table2  = tableName;
+			parse(table, alias,rid);
+		}
+		catch(Exception e){
+			System.out.println("Index Scan: Table does not exist");
 			System.out.println(e);
 		}
 	}
@@ -98,7 +98,6 @@ public class Tuple{
 		}
 		
 	}
-	
 	/**
 	 * Another parse for RIds (handle unclustered)
 	 * @param table
@@ -123,7 +122,6 @@ public class Tuple{
 		}
 		
 	}
-	
 	public int getPage()
 	{
 		return page;
@@ -214,7 +212,7 @@ public class Tuple{
      * @return values
      * the values of the columns of the tuple
      */
-	public Hashtable<String,Integer> getValues()
+	public Hashtable getValues()
 	{
 		return values;
 	}

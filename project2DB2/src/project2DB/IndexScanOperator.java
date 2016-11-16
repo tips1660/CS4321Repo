@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import tree.*;
 import net.sf.jsqlparser.schema.Table;
 
 public class IndexScanOperator extends Operator {
@@ -109,8 +107,23 @@ public class IndexScanOperator extends Operator {
 				//TODO: Need a way to read the tuple directly from the DB file given the RID
 				//
 				//HELP!!! 
-				return null;
+				TupleReader readerGetNext;
+				try
+				{
+					readerGetNext = new TupleReader(fileUrl, RIdNext.getPageId(), RIdNext.getTupleId());
+					Tuple returnedTuple = new Tuple(table, alias, readerGetNext);
+					if(alias == null) returnedTuple.setName(table);
+					
+					return returnedTuple;
+					
+				}catch(IOException e)
+				{
+					e.printStackTrace();
+				}
 				
+				Tuple returnedTuple = new Tuple(table, alias, reader);
+				returnedTuple.setName("ENDOFFILE");
+				return returnedTuple;
 			}
 			
 			
@@ -121,7 +134,7 @@ public class IndexScanOperator extends Operator {
 			if (alias == null)returnedTuple.setName(table);
 			
 			//check if reached end OR reached a tuple greater than highkey. END
-			if (reader.getArrayList().isEmpty() || returnedTuple.getValues().get(attr) > highkey) {
+			if (reader.getArrayList().isEmpty() || (int)returnedTuple.getValues().get(attr) > highkey) {
 				returnedTuple.setName("ENDOFFILE");
 			}
 			return returnedTuple;

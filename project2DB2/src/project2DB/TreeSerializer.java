@@ -150,7 +150,6 @@ public class TreeSerializer {
 							buffer.putInt(currentByte, keys.get(p));
 							currentByte+=4;
 						}
-						System.out.println("there should be 16 children: " + children.size());
 						for(int p =0; p < children.size(); p++){
 							buffer.putInt(currentByte, ((IndexNode)children.get(p)).pageNumber);
 							currentByte+=4;

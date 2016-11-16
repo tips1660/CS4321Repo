@@ -52,6 +52,19 @@ public class LeafNode extends TreeNode{
 		}
 
 	}
+	public void setDataEntry(Hashtable<Integer, ArrayList<RId>> dataEntries) {
+	    dataEntry = dataEntries;
+		
+	}
+	public void setPage(int page)
+	{
+		pageNumber = page;
+	}
+	
+	public int getAddress() {
+		// TODO Auto-generated method stub
+		return pageNumber;
+	}
 }
 
 
