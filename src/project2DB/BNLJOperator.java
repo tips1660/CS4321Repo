@@ -1,5 +1,6 @@
 package project2DB;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,25 +43,62 @@ public class BNLJOperator extends Operator {
 	private boolean staySame = false;
 	private int counter = 0;
 	Tuple currTuple = null;
+	IndexVisitor visitor = new IndexVisitor();
+	int u;
 
 	
 	
 	public BNLJOperator(Operator lOp, List<Join> jList, HashMap<String, Expression> solo, 
 			HashMap<String, Expression> join, 
-			ArrayList<Expression> rejected, int pages,int numA) throws FileNotFoundException {
+			ArrayList<Expression> rejected, int pages,int numA, int u) throws FileNotFoundException {
 		
 		joinList = jList;
 		leftOp = lOp;
 		soloMap = solo;
 		joinMap = join;
 		rejectedJoins = rejected;
+		this.u = u;
 
 		rightExp = soloMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
 		if (rightExp == null){
 			rightOp = new scanOperator(((Table)joinList.get(0).getRightItem()));
 		}
 		else{
-			rightOp = new SelectOperator(((Table)joinList.get(0).getRightItem()), rightExp);
+			if (u == 0)
+				rightOp = new SelectOperator(((Table)joinList.get(0).getRightItem()), rightExp);
+			else {
+				String t = ((Table)joinList.get(0).getRightItem()).getWholeTableName();
+				String index = visitor.setIndex(t);
+				rightExp.accept(visitor);
+				visitor.buildExpressions();
+				boolean newChild = false;
+				boolean fullIndex = false;
+				IndexScanOperator op = null;
+				if (!visitor.getIndexArray().isEmpty()) {
+					newChild = true;
+					int cluster = visitor.setCluster(index);
+					File f = visitor.getFile();
+					try {
+						op = new IndexScanOperator((Table)joinList.get(0).getRightItem(), f, index, cluster, visitor.getLow(), visitor.getHigh());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					if (visitor.getNotIndexExpression() != null) {
+						rightExp = visitor.getNotIndexExpression();
+					}
+					else {
+						newChild = false;
+						fullIndex = true;
+						rightOp = op;
+					}
+				}
+				if (!fullIndex) {
+					rightOp = new SelectOperator((Table)joinList.get(0).getRightItem(), rightExp);
+				}
+				if (newChild) {
+					rightOp.setChild(op);
+				}
+			}
 		}
 
 		joinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
