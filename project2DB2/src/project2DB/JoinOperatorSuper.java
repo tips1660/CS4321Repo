@@ -1,5 +1,6 @@
 package project2DB;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,11 +40,14 @@ public class JoinOperatorSuper extends Operator {
 	//ExternalSortOperator leftOpExternal;
 	Hashtable<String, String> tableAlias  = new Hashtable<String, String>();
 	private DatabaseCatalog cat = DatabaseCatalog.getInstance();
+	IndexVisitor visitor = new IndexVisitor();
+	int u;
 
 
-	public JoinOperatorSuper(String tempDir, Table tableN, List<Join> jList, Expression e, int j1, int j2, int st, int sortBuffer) throws IOException
+	public JoinOperatorSuper(String tempDir, Table tableN, List<Join> jList, Expression e, int j1, int j2, int st, int sortBuffer, int useIndex) throws IOException
 	{
 		jCondition = j1;
+		u = useIndex;
 		System.out.println("are we getting to join operator super appropriately");		 
 		joinList = jList;	
 		tableAlias= makeTableAlias(tableN, jList);
@@ -74,15 +78,45 @@ public class JoinOperatorSuper extends Operator {
 			leftOp = new scanOperator(tableN);
 		}
 		else{
-			leftOp = new SelectOperator(tableN, leftExp);
+			if (u == 0) {
+				leftOp = new SelectOperator(tableN, leftExp);
+			}
+			else {
+				String index = visitor.setIndex(tableN.getWholeTableName());
+				leftExp.accept(visitor);
+				visitor.buildExpressions();
+				boolean newChild = false;
+				boolean fullIndex = false;
+				IndexScanOperator op = null;
+				if (!visitor.getIndexArray().isEmpty()) {
+					newChild = true;
+					int cluster = visitor.setCluster(index);
+					File f = visitor.getFile();
+					op = new IndexScanOperator(tableN, f, index, cluster, visitor.getLow(), visitor.getHigh());
+					if (visitor.getNotIndexExpression() != null) {
+						leftExp = visitor.getNotIndexExpression();
+					}
+					else {
+						newChild = false;
+						fullIndex = true;
+						leftOp = op;
+					}
+				}
+				if (!fullIndex) {
+					leftOp = new SelectOperator(tableN, leftExp);
+				}
+				if (newChild) {
+					leftOp.setChild(op);
+				}
+			}
 		}
 
 		tableProperties table = (tableProperties) cat.getTableCatalog().get(tableN.getWholeTableName());
 		int numAttributes = table.getColumns().size();
 		if (j1 == 0)
-			joinOp = new JoinOperator(leftOp, joinList, soloMap, joinMap, rejectedJoins);
+			joinOp = new JoinOperator(leftOp, joinList, soloMap, joinMap, rejectedJoins, u);
 		else if (j1 == 1){//in future change it 
-			joinOp = new BNLJOperator(leftOp, joinList, soloMap, joinMap, rejectedJoins, j2, numAttributes);
+			joinOp = new BNLJOperator(leftOp, joinList, soloMap, joinMap, rejectedJoins, j2, numAttributes,u);
 		}
 		else {
 
@@ -140,11 +174,11 @@ public class JoinOperatorSuper extends Operator {
 			}
 		
 
-			System.out.println("correctly building this right?");
+			//System.out.println("correctly building this right?");
 			if(st==0)
 			joinOpSMJ = new SMJOperator(leftOpSort, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, false);
 			else{
-				System.out.println("JOINCODEV3: SHOULD HAVE MADE A SMJ WITH EX SET TO TRUE");
+				//System.out.println("JOINCODEV3: SHOULD HAVE MADE A SMJ WITH EX SET TO TRUE");
 				joinOpSMJ = new SMJOperator(leftOpSort, joinList, soloMap, joinMap, rejectedJoins, sortBuffer, ctr, tempDir, true);
 			}
 
@@ -154,21 +188,21 @@ public class JoinOperatorSuper extends Operator {
 		}
 
 		while (joinList.size() > 1) {
-			System.out.println("JOINCODEV1: SHOULD HAVE NOT COME HERE FOR QUERIES WITH 1 JOIN");
+			//System.out.println("JOINCODEV1: SHOULD HAVE NOT COME HERE FOR QUERIES WITH 1 JOIN");
 			Join first = joinList.remove(0);
 			String s = ((Table) first.getRightItem()).getWholeTableName();
 			tableProperties t = (tableProperties) cat.getTableCatalog().get(s);
 			numAttributes += t.getColumns().size();
-			System.out.println("i'm here now");
+			//System.out.println("i'm here now");
 			if (j1 == 0)
-				joinOp = new JoinOperator(joinOp, joinList, soloMap, joinMap, rejectedJoins);
+				joinOp = new JoinOperator(joinOp, joinList, soloMap, joinMap, rejectedJoins, u);
 			else if(j1==1) {
-				joinOp = new BNLJOperator(joinOp, joinList, soloMap, joinMap, rejectedJoins, j2, numAttributes);
+				joinOp = new BNLJOperator(joinOp, joinList, soloMap, joinMap, rejectedJoins, j2, numAttributes,u);
 			}
 			else
 			{//for SMJ
 				leftJoinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
-				System.out.println("i'm over in this else statement now in JOINOPSUPER");
+				//System.out.println("i'm over in this else statement now in JOINOPSUPER");
 				if (leftJoinExp == null) {
 
 					if (!rejectedJoins.isEmpty()) {

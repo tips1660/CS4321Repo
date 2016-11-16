@@ -240,7 +240,6 @@ public class SMJOperator extends Operator {
 					values = concatTuples(a,rightPartitionTraverser);
 					returnedTuple.setName(a.getTable());
 					returnedTuple.setValues(values);
-					System.out.println("SMJCode v5: I am writing: " + returnedTuple.getValues() + " this is the " + bufferCtr + " write");
 					tupleBuffer.put(bufferCtr, returnedTuple);
 					bufferCtr++;
 
