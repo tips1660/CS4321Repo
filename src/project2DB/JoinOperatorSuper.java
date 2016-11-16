@@ -116,7 +116,7 @@ public class JoinOperatorSuper extends Operator {
 		if (j1 == 0)
 			joinOp = new JoinOperator(leftOp, joinList, soloMap, joinMap, rejectedJoins, u);
 		else if (j1 == 1){//in future change it 
-			joinOp = new BNLJOperator(leftOp, joinList, soloMap, joinMap, rejectedJoins, j2, numAttributes);
+			joinOp = new BNLJOperator(leftOp, joinList, soloMap, joinMap, rejectedJoins, j2, numAttributes,u);
 		}
 		else {
 
@@ -197,7 +197,7 @@ public class JoinOperatorSuper extends Operator {
 			if (j1 == 0)
 				joinOp = new JoinOperator(joinOp, joinList, soloMap, joinMap, rejectedJoins, u);
 			else if(j1==1) {
-				joinOp = new BNLJOperator(joinOp, joinList, soloMap, joinMap, rejectedJoins, j2, numAttributes);
+				joinOp = new BNLJOperator(joinOp, joinList, soloMap, joinMap, rejectedJoins, j2, numAttributes,u);
 			}
 			else
 			{//for SMJ
