@@ -37,7 +37,7 @@ public class TupleReader {
 		fc.position(index);
 		getNextPage();
 		
-		//potential off by one error based on indexing
+		//potential off by one error based on indexing?
 		while (currentTuple < tupleID-1){
 			tuple = getNextTuple();
 		}
@@ -69,12 +69,30 @@ public class TupleReader {
     public int getNextPage() throws IOException {
     	tupleNum=-1;
     	currentPage+=1;
+    	currentTuple = 0;
     	buffer.clear();
     	int numBytes = fc.read(buffer);
     	//System.out.println("getNextPage was called");
     	if (numBytes != -1)
     		setInfo();
     	return numBytes;
+    }
+    
+    /**
+     * Override to handle getting a specific page, for unclustered index use.
+     * @param pageNum
+     * @return
+     * @throws IOException
+     */
+    public int getNextPage(int pageNum) throws IOException{
+    	tupleNum = -1;
+    	currentPage = pageNum;
+    	buffer.clear();
+    	fc.position(4096*pageNum);
+    	int numBytes = fc.read(buffer);
+    	if (numBytes != -1) setInfo();
+    	return numBytes;
+
     }
     
     public void setInfo() {
@@ -120,6 +138,34 @@ public class TupleReader {
     	currentTuple++;
     	return tuple;
     }
+    
+    /**
+     * 
+     * @param tupleID specific tupleID on the page to return
+     * @return the tupleID'th tuple on the given page
+     * @throws IOException
+     */
+    public ArrayList<Integer> getNextTuple(int tupleID) throws IOException {
+    	//set current byte to the beginning of the tupleID on the page
+    	currentByte = 8 + tupleID*numAttributes;
+    	
+    	if (!tuple.isEmpty()) tuple.clear();
+
+		int currentAttribute = 0;
+		tupleNum = tupleID;
+		while (currentAttribute < numAttributes) {
+			currentAttribute++;
+			//System.out.print(buffer.getInt(currentByte) + " ");
+			tuple.add(buffer.getInt(currentByte));
+			currentByte += 4;
+		}
+    		//System.out.println();
+    	
+    	currentTuple++;
+    	return tuple;
+    }
+    
+    
     public int getTupleNum()
     {
     	return tupleNum;

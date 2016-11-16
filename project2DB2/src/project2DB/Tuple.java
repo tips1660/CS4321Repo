@@ -17,7 +17,8 @@ public class Tuple{
 	private TupleReader reader;
 	private ArrayList<String> itemList = new ArrayList<String>();
 	private int page;
-	private int tupleNum;
+	private int tupleNum;	
+
 	
 	/*
 	 * Deprecated
@@ -52,6 +53,19 @@ public class Tuple{
 			System.out.println(e);
 		}
 	}
+	public Tuple (String tableName, String alias, TupleReader r, RId rid){
+		try{
+
+			tableProperties table = (tableProperties) cat.getTableCatalog().get(tableName);
+			reader = r;
+			table2  = tableName;
+			parse(table, alias,rid);
+		}
+		catch(Exception e){
+			System.out.println("Index Scan: Table does not exist");
+			System.out.println(e);
+		}
+	}
 	
 	public Tuple(TupleReader r) {
 		reader = r;
@@ -72,6 +86,30 @@ public class Tuple{
 	{
 		ArrayList<Integer> tuples = new ArrayList<Integer>();
 		tuples = reader.getNextTuple();
+		page = reader.getPage();
+		tupleNum = reader.getTupleNum();
+		for (int i = 0; i < tuples.size(); i++) {
+			if (alias != null) {
+				values.put(alias+"."+(String)table.getColumns().get(i), tuples.get(i));
+			}
+			else {
+				values.put(table2+"."+(String)table.getColumns().get(i), tuples.get(i));
+			}
+		}
+		
+	}
+	/**
+	 * Another parse for RIds (handle unclustered)
+	 * @param table
+	 * @param alias
+	 * @param rid
+	 * @throws IOException
+	 */
+	public void parse(tableProperties table, String alias,RId rid) throws IOException
+	{
+		reader.getNextPage(rid.pageId);
+		ArrayList<Integer> tuples = new ArrayList<Integer>();
+		tuples = reader.getNextTuple(rid.tupleId);
 		page = reader.getPage();
 		tupleNum = reader.getTupleNum();
 		for (int i = 0; i < tuples.size(); i++) {

@@ -7,6 +7,7 @@ public class IndexNode extends TreeNode{
 	ArrayList<Integer> keys = new ArrayList<Integer>();
     int smallest  = Integer.MAX_VALUE;
     public int pageNumber;
+    ArrayList<Integer> childPages = new ArrayList<Integer>();
 	public ArrayList<TreeNode> getChildren() {
 		return children;
 	}
@@ -29,6 +30,16 @@ public class IndexNode extends TreeNode{
 		this.smallest = smallestKey;
 		
 	}
+	public void setChildPages(ArrayList<Integer> children2) {
+
+		childPages = children2;
+	}
+
+	public ArrayList<Integer> getChildPages() {
+
+		return childPages;
+	}
+
 	
 	
 
