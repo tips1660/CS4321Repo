@@ -56,29 +56,7 @@ public class BPlusTree {
 	public void initialIndexNodesReal()
 	{// call this repeatedly till ctr = buffer size
 		IndexNode node = new IndexNode();
-		/*indexCtr++;
-		while(mCtr < (numChildrenToBeAdded/2)-1)
-		{
-			node.getKeys().add(leafLayer.get(indexCtr).getSmallestKey());
-			node.getChildren().add(leafLayer.get(indexCtr));
-			mCtr++;
-			indexCtr++;
-		}
-		indexLayer.add(node);
-		node = new IndexNode();
-		mCtr=0;
-		node.getChildren().add(leafLayer.get(indexCtr));
-		node.setSmallestKey(leafLayer.get(indexCtr).getSmallestKey());
-		indexCtr++;
-		while(indexCtr < leafLayer.size())
-		{
-			node.getKeys().add(leafLayer.get(indexCtr).getSmallestKey());
-			node.getChildren().add(leafLayer.get(indexCtr));
-			indexCtr++;
-		}
-		indexLayer.add(node);
-		continueCreateIndexNodes = false;
-		indexCtr=0;*/
+		
 		if(arrayPtr == 0)
 		{  
 			numChildrenToBeAdded = indexLayer.size()-lastIndex;

@@ -97,10 +97,14 @@ public class JoinTreeVisitor implements ExpressionVisitor {
 		String right="";
 		String left="";
 		
-		if(right1!=null)
-		 right = tableAlias.get(right1.toString());
-		if(left1!=null)
-			left = tableAlias.get(left1.toString());
+		if(right1!=null){
+			System.out.println("lmao " + right1.toString());
+		 right = (right1.toString());
+		}
+		if(left1!=null){
+			System.out.println("lmaoL "+ left1.toString());
+			left = (left1.toString());
+		}
 		
 		if (left1.toString().equals(right.toString()) || left == "") 
 		{
@@ -111,10 +115,11 @@ public class JoinTreeVisitor implements ExpressionVisitor {
 				newAnd.setLeftExpression(contained);
 				newAnd.setRightExpression(e);
 				soloMap.put(right,newAnd);
+				System.out.println("bahahaha");
+ 				System.out.println(newAnd.getStringExpression());
 			}
 			else
 			{			
-
 				soloMap.put(right, e);
 			}
 
@@ -127,11 +132,13 @@ public class JoinTreeVisitor implements ExpressionVisitor {
 				AndExpression newAnd = new AndExpression();
 				newAnd.setLeftExpression(contained);
 				newAnd.setRightExpression(e);
-				soloMap.put(left,newAnd);
+ 				soloMap.put(left,newAnd);
+ 				System.out.println("bahahaha");
+ 				System.out.println(newAnd.getStringExpression());
 			}
 			else
 			{
-			soloMap.put(left, e);
+ 			soloMap.put(left, e);
 			}
 		}
 		else {

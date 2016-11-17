@@ -55,7 +55,11 @@ public class SMJOperator extends Operator {
 		soloMap = solo;
 		joinMap = join;
 		rejectedJoins = rejected;
-		joinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
+		if(((Table)joinList.get(0).getRightItem()).getAlias() == null)
+			joinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
+		else
+			joinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getAlias());
+
 		if(exTF == false)
 		{
 			rightOp = new SortOperator(items1, null);
@@ -63,7 +67,7 @@ public class SMJOperator extends Operator {
 		}
 		else
 		{
- 			rightOp = new ExternalSortOperator(tempDir, j2, ctr, items1, null);
+			rightOp = new ExternalSortOperator(tempDir, j2, ctr, items1, null);
 			ex=true;
 
 		}
@@ -88,7 +92,11 @@ public class SMJOperator extends Operator {
 		}
 		System.out.println("SMJCode v2: My JoinEXP is: " + joinExp.toString());
 
+		if(((Table)joinList.get(0).getRightItem()).getAlias() == null)
 		rightExp = soloMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
+		else
+			rightExp = soloMap.get(((Table)joinList.get(0).getRightItem()).getAlias());
+
 		if (rightExp == null){
 			// for in memory sorting
 			scanOperator scanRight = new scanOperator(((Table)joinList.get(0).getRightItem()));
@@ -151,15 +159,15 @@ public class SMJOperator extends Operator {
 		while(a==null){
 			a= leftOp.getNextTuple();
 
-			
+
 		}
-         
+
 		System.out.println("SMJCode v3: my a tuple is: " + a.getValues());
 
 		b=rightOp.getNextTuple();
 
-		 if(b!=null)
-		System.out.println("SMJCode v3: my b tuple is: " + b.getValues());
+		if(b!=null)
+			System.out.println("SMJCode v3: my b tuple is: " + b.getValues());
 	}
 
 	public int tupleCompare(Tuple a, Tuple b)
@@ -275,14 +283,14 @@ public class SMJOperator extends Operator {
 
 				while (tupleCompare(a, rightPartitionTraverser) == 0)
 				{
-					returnedTuple = new Tuple();
+ 					returnedTuple = new Tuple();
 					Hashtable<String, Integer> values = new Hashtable<String, Integer>();
 					values = concatTuples(a,rightPartitionTraverser);
 					returnedTuple.setName(a.getTable());
 					returnedTuple.setValues(values);
 					tupleBuffer.put(bufferCtr, returnedTuple);
 					bufferCtr++;
-
+					System.out.println(returnedTuple.getValues());
 					rightPartitionTraverser = rightOp.getNextTuple();
 
 
@@ -293,23 +301,23 @@ public class SMJOperator extends Operator {
 						partitionTraverser++;
 					}
 				}
-				
-					a =leftOp.getNextTuple();
-			
+
+				a =leftOp.getNextTuple();
+
 				while(a==null)
 				{   
-					
-						a=leftOp.getNextTuple();
-					
+
+					a=leftOp.getNextTuple();
+
 
 				}
 				if(a.getValues()!=null)
 					System.out.println("RB: moving my A up, still with the same B, new A has the followign values: " + a.getValues());
 			}
 			System.out.println(b.getValues());
-				rightOp.reset(partitionCtr+partitionTraverser);
-				b=rightOp.getNextTuple();
-			
+			rightOp.reset(partitionCtr+partitionTraverser);
+			b=rightOp.getNextTuple();
+
 			partitionCtr= partitionCtr+partitionTraverser;
 
 
@@ -317,19 +325,19 @@ public class SMJOperator extends Operator {
 			System.out.println("the A has the following value set: " + a.getValues());
 
 			while(b==null){
-				
-					b=rightOp.getNextTuple();
-			
+
+				b=rightOp.getNextTuple();
+
 				partitionCtr++;
 			}
 			if(b.getTable().equals("ENDOFFILE") && !a.getTable().equals("ENDOFFILE") && !(joinExp instanceof EqualsTo))
 			{
-				
-					rightOp.reset(beforeLoop); 
-					b=rightOp.getNextTuple();
 
-				
-				
+				rightOp.reset(beforeLoop); 
+				b=rightOp.getNextTuple();
+
+
+
 
 				partitionCtr=beforeLoop;
 			}
@@ -428,7 +436,7 @@ public class SMJOperator extends Operator {
 				continue;
 			}
 			else{
-			val1.put(accessor,(Integer)tuple1.getValues().get(accessor));
+				val1.put(accessor,(Integer)tuple1.getValues().get(accessor));
 			}
 
 		}
@@ -441,17 +449,17 @@ public class SMJOperator extends Operator {
 				continue;
 			}
 			else{
-			//gets the key im on for tuple2
-			if(val1.get(accessor) !=null)
-			{
- 				val1.put(accessor + "1", val2.get(accessor));
-			}
-			else
-			{
- 
-				val1.put(accessor,val2.get(accessor));
+				//gets the key im on for tuple2
+				if(val1.get(accessor) !=null)
+				{
+					val1.put(accessor + "1", val2.get(accessor));
+				}
+				else
+				{
 
-			}
+					val1.put(accessor,val2.get(accessor));
+
+				}
 			}
 		}
 		return val1;

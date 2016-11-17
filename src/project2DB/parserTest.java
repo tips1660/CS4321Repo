@@ -81,8 +81,8 @@ public class parserTest {
 
 		queriesFile = inputDir[3].getAbsolutePath();
 		File[] tables = data[1].listFiles();
-		File index_info = data[2];
-		File[] indexes = data[3].listFiles();
+		File index_info = data[3];
+		File[] indexes = data[2].listFiles();
 		File schema = data[4];
 
 		//System.out.println(schema.getAbsolutePath());
@@ -109,7 +109,7 @@ public class parserTest {
 			tableToIndex.put(table, indexName);
 			indexToCluster.put(indexName, clustered);
 			int order = Integer.parseInt(split_line[3]);
-			String indexOut = data[3] + File.separator + indexName;
+			String indexOut = data[2] + File.separator + indexName;
 			if(buildIndex == 1)
 			{
 				

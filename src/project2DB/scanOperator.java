@@ -59,16 +59,23 @@ public class scanOperator extends Operator{
 	 */
 	//@Override
 	public Tuple getNextTuple() {
-		
 		//System.out.println(table);
 		Tuple returnedTuple = new Tuple(table, alias, reader);
-		if (alias == null)
+ 		if (alias == null){
+ 
 			returnedTuple.setName(table);
-		if (reader.getArrayList().isEmpty()) {
+		}
+         if(reader==null)
+         {
+        	 System.out.println("hehexd?23");
+         }
+		if (reader.getArrayList().isEmpty()) 
+		{
+ 
 			returnedTuple.setName("ENDOFFILE");
 			System.out.println("endoffile");
 		}
-		//System.out.println(returnedTuple.getValues().keySet());
+
 		return returnedTuple;
 			
 	}

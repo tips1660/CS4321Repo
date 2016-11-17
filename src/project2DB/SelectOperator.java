@@ -35,6 +35,12 @@ public class SelectOperator extends Operator {
 		File f = new File(fileUrl);
 		scan = new Scanner(f);
 	}
+	
+	//TODO added new cons
+	public SelectOperator(Expression input)
+	{
+		e = input;
+	}
 
 	@Override
 	/**
@@ -46,6 +52,10 @@ public class SelectOperator extends Operator {
 		if(child ==null)
 			child = new scanOperator(t);
 		returnedTuple = child.getNextTuple();
+		//TODO added this for join
+		while (returnedTuple == null) {
+			returnedTuple = child.getNextTuple();
+		}
 		if(returnedTuple.getTable().equals("ENDOFFILE"))
 		{
 			return returnedTuple;

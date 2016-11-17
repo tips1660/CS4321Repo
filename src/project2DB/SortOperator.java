@@ -26,7 +26,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 public class SortOperator extends SortOperatorParent  {
 
 	ArrayList<Tuple> buffer = new ArrayList<Tuple>();
-	 List<OrderByElement> sortList;
+	List<OrderByElement> sortList;
 	static ArrayList<String> sortListActual;
 	ArrayList<String> sortListActualNonStatic;
 	int ctr=0;
@@ -34,15 +34,15 @@ public class SortOperator extends SortOperatorParent  {
 	ArrayList<String>columnList;
 	private TupleWriter writer;
 	private Table table;
-    boolean bufferInit = false;
-    int ctrBuffer =0;
-    AllColumns asterik = new AllColumns();
-    
-	
+	boolean bufferInit = false;
+	int ctrBuffer =0;
+	AllColumns asterik = new AllColumns();
+
+
 	public SortOperator(String out, ArrayList<SelectItem> items1, List<OrderByElement> orderList) throws IOException
 	{    
 		System.out.println("i got to this constructor");
-		
+
 		items = items1;
 		writer = new TupleWriter(out);
 		sortList = orderList;
@@ -56,25 +56,25 @@ public class SortOperator extends SortOperatorParent  {
 			items = new ArrayList<SelectItem>();
 			items.add(asterik);
 		}
-	
+
 
 	}
-	
+
 	public SortOperator(ArrayList<SelectItem> items1, List<OrderByElement> orderList) throws IOException
 	{    System.out.println("got to my sort operator constructor");
-		items = items1;
-		//writer = null;
-		sortList = orderList;
-		if(sortList==null)
-			sortList = new ArrayList<OrderByElement>();
-		sortListActualNonStatic = new ArrayList<String>();
-		///ProjectOperator childOp = new ProjectOperator(items, joinList, select, tableN);
-		//this.setChild(childOp);		
-		if(this.items == null)
-		{
-			items = new ArrayList<SelectItem>();
-			items.add(asterik);
-		}
+	items = items1;
+	//writer = null;
+	sortList = orderList;
+	if(sortList==null)
+		sortList = new ArrayList<OrderByElement>();
+	sortListActualNonStatic = new ArrayList<String>();
+	///ProjectOperator childOp = new ProjectOperator(items, joinList, select, tableN);
+	//this.setChild(childOp);		
+	if(this.items == null)
+	{
+		items = new ArrayList<SelectItem>();
+		items.add(asterik);
+	}
 
 	}
 	/**
@@ -93,7 +93,7 @@ public class SortOperator extends SortOperatorParent  {
 		System.out.println("this things table is being set right");
 		table = t;
 	}
-	
+
 	public ArrayList<Tuple> getBuffer()
 	{
 		return buffer;
@@ -110,7 +110,7 @@ public class SortOperator extends SortOperatorParent  {
 			sortList = new ArrayList<OrderByElement>();
 		sortList.add(op);
 	}
-	
+
 	/**
 	 * gets the list of columns in order
 	 * 
@@ -121,8 +121,8 @@ public class SortOperator extends SortOperatorParent  {
 	{
 		return columnList;
 	}
-	
-	
+
+
 	public static Comparator<Tuple> TupleComparator = new Comparator<Tuple>()
 	{
 		@Override
@@ -138,29 +138,29 @@ public class SortOperator extends SortOperatorParent  {
 			for(int i =0; i<sortListActual.size(); i++){
 				//System.out.println("sorting on col: " + sortListActual.get(i));
 			}
-			
+
 			for(int i =0; i< sortListActual.size(); i++)
 			{  
 				try {
-				Integer a = (Integer) o1.getValues().get(sortListActual.get(i));
-				Integer b = (Integer) o2.getValues().get(sortListActual.get(i));
-		        
-				if(a.intValue()<b.intValue())
-					return -1;
-				else if(a.intValue()>b.intValue())
-					return 1;
-				else
-					continue;
+					Integer a = (Integer) o1.getValues().get(sortListActual.get(i));
+					Integer b = (Integer) o2.getValues().get(sortListActual.get(i));
+
+					if(a.intValue()<b.intValue())
+						return -1;
+					else if(a.intValue()>b.intValue())
+						return 1;
+					else
+						continue;
 				} catch(Exception e){
 					System.out.println("COLUMN ERROR");
-				//means this column isn't in my tuple
-				continue;	
+					//means this column isn't in my tuple
+					continue;	
 				}
 			}
 			return 0;
 		}
 	};
-	
+
 	/**
 	 * getNextTuple() returns the next tuple of this sort operator, or an ENDOFFILE object if there are no more tuples
 	 * 
@@ -185,9 +185,9 @@ public class SortOperator extends SortOperatorParent  {
 			temp.setName("ENDOFFILE");
 			return temp;
 		}
-	
+
 	}
-	
+
 	/**
 	 * 
 	 * @param s -> adds this parameter to the sort list.
@@ -199,102 +199,105 @@ public class SortOperator extends SortOperatorParent  {
 	/**
 	 * sets up the buffer, then sorts it based on the conditions
 	 */
-   public void setupBuffer()
-   {
-	   System.out.println("got to my buffer set up");
-	   bufferInit = true;
+	public void setupBuffer()
+	{
+		System.out.println("got to my buffer set up");
+		bufferInit = true;
 
-	  columnList = ((ProjectOperator)this.getChild()).getColumnList();
-	   System.out.println("got to my buffer set up2");
-	   
-	   for(int i =0; i< sortList.size(); i++)
+		columnList = ((ProjectOperator)this.getChild()).getColumnList();
+		System.out.println("got to my buffer set up2");
+
+		for(int i =0; i< sortList.size(); i++)
 		{
 			sortListActualNonStatic.add(sortList.get(i).toString());
-			
+
 		}
-	   if(columnList == null)
-		   System.out.println("ES NULLL");
-       for(int i = 0; i<columnList.size(); i++)
-       {
-       	if(sortListActualNonStatic.contains(columnList.get(i)))
-       			continue;
-       	else
-       		sortListActualNonStatic.add(columnList.get(i));
-        				
-       }
-		  System.out.println("this is my current sort order: " + sortListActualNonStatic);
+		if(columnList == null)
+			System.out.println("ES NULLL");
+		for(int i = 0; i<columnList.size(); i++)
+		{
+			if(sortListActualNonStatic.contains(columnList.get(i)))
+				continue;
+			else
+				sortListActualNonStatic.add(columnList.get(i));
 
-	   Tuple currentTuple = child.getNextTuple();
+		}
+		System.out.println("this is my current sort order: " + sortListActualNonStatic);
 
-	   while(true)
-	   {
-		   if(currentTuple == null){
+		Tuple currentTuple = child.getNextTuple();
+		System.out.println("am i going into the right stuff");
+ 		while(true)
+		{
+			if(currentTuple == null){
+				currentTuple= child.getNextTuple();
+				while(currentTuple==null){
+					currentTuple = child.getNextTuple();
+					System.out.println("keep getting nulls for days");
+				}
+				if(currentTuple.getValues().keySet().size() > 5)
+				{
+					System.out.println("Gaga: " + currentTuple.getValues());
+				}
 
-			   currentTuple= child.getNextTuple();
-			   while(currentTuple==null)
-				   currentTuple = child.getNextTuple();
-			   if(currentTuple.getValues().keySet().size() > 5)
-			   {
-				   System.out.println("Gaga: " + currentTuple.getValues());
-			   }
-			  
-		   }
-		   else
-		   {
-		       	if(currentTuple.getTable()==null)
-		       		System.out.println("no table");
-		       
-		       	
+			}
+			else
+			{  System.out.println("aint null");
+			
+				if(currentTuple.getTable()==null)
+					System.out.println("no table");
+
+
 				if(currentTuple.getTable().equals("ENDOFFILE")){
 					System.out.println("not coming here right?");
 					break;
 				}
 				else{
-					
-					buffer.add(currentTuple);
+					System.out.println("buffer: " + currentTuple.getValues());
+ 					buffer.add(currentTuple);
 					currentTuple = child.getNextTuple();
 					while(currentTuple == null)
 						currentTuple=child.getNextTuple();
-					
 
-					
+
+
 				}
 
-		   }
-		   	
-	   }
+			}
+			System.out.println("wile loop check");
 
-	   try {
+		}
 
-		   sortListActual = new ArrayList<String>();
-		   for(int i =0; i< sortListActualNonStatic.size(); i++)
-		   {
-			   sortListActual.add(sortListActualNonStatic.get(i));
-		   }
-		   System.out.println(sortListActualNonStatic);
-			   System.out.println("presorting check32: " +sortListActual);
-			   System.out.println("the size of the buffer is "+buffer.size());
+		try {
+
+			sortListActual = new ArrayList<String>();
+			for(int i =0; i< sortListActualNonStatic.size(); i++)
+			{
+				sortListActual.add(sortListActualNonStatic.get(i));
+			}
+			System.out.println(sortListActualNonStatic);
+			System.out.println("presorting check32: " +sortListActual);
+			System.out.println("the size of the buffer is "+buffer.size());
 			Collections.sort(buffer, TupleComparator);
-	   }
-	   catch(Exception e) {
-	    	   System.out.println("caught an exception sorting this");
-	   }
-   }
-   public void setTupleWriter(TupleWriter t)
-   {
-	   writer = t;
-   }
-   
+		}
+		catch(Exception e) {
+			System.out.println("caught an exception sorting this");
+		}
+	}
+	public void setTupleWriter(TupleWriter t)
+	{
+		writer = t;
+	}
+
 	//@Override
 	/**
 	 * Dump prints out every tuple from the sort
 	 */
 	public void dump() {
-		
-		
+
+
 		if(bufferInit == false)
-		setupBuffer();
-		
+			setupBuffer();
+
 		for(int i =0; i<buffer.size(); i++)
 		{
 			Tuple newTuple = new Tuple();
@@ -315,8 +318,8 @@ public class SortOperator extends SortOperatorParent  {
 				itemList.add(colName);
 				newValues.put(colName, (Integer) buffer.get(i).getValues().get(colName));
 				System.out.println(buffer.get(i).getValues().get(colName));
-				
-				
+
+
 				//useful stuff
 				buffer.get(i).setOutputOrder(itemList);
 			}
@@ -330,10 +333,10 @@ public class SortOperator extends SortOperatorParent  {
 				String colName = columnList.get(columnList.size()-1);
 				newValues.put(colName, (Integer) buffer.get(i).getValues().get(colName));
 				System.out.println(buffer.get(i).getValues().get(colName));
-				 buffer.get(i).setOutputOrder(columnList);
+				buffer.get(i).setOutputOrder(columnList);
 			}
 			newTuple.setValues(newValues);
-			
+
 			//System.out.println(newValues.values());
 			try {
 				writer.writeTuple(buffer.get(i));
@@ -354,20 +357,20 @@ public class SortOperator extends SortOperatorParent  {
 	}
 	public void sort() throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 
 	@Override
 	public void reset() {
-		
+
 	}
-	
+
 	public void reset(int index){
 		ctr=index;
 	}
 
-	
-	
+
+
 
 }
