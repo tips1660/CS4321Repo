@@ -226,16 +226,16 @@ public class ProjectOperator extends Operator {
 			System.out.println("got it");
 		if(items.get(0) instanceof AllColumns)
 		{
-			//System.out.println("we r coming here in project");
+			System.out.println("i should be going to this no2w");
 			return returnedTuple;
 		}
 		else if(returnedTuple !=null)
 		{
 			if(returnedTuple.getTable().equals("ENDOFFILE"))
 			{
+				System.out.println("i should be going to this now");
 				Tuple finalTuple = new Tuple();
 				finalTuple.setName("ENDOFFILE");
-				System.out.println("got an endoffile in project");
 				return finalTuple;
 			}
 			else

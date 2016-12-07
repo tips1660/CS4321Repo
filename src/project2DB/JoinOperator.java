@@ -48,8 +48,11 @@ public class JoinOperator extends Operator {
 		joinMap = join;
 		rejectedJoins = rejected;
 		u = useIndexes;
-
+		if(((Table)joinList.get(0).getRightItem()).getAlias() == null)
 		rightExp = soloMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
+		else
+			rightExp = soloMap.get(((Table)joinList.get(0).getRightItem()).getAlias());
+		
 		if (rightExp == null){
 			rightOp = new scanOperator(((Table)joinList.get(0).getRightItem()));
 		}
@@ -90,8 +93,10 @@ public class JoinOperator extends Operator {
 				}
 			}
 		}
-
+		if(((Table)joinList.get(0).getRightItem()).getAlias() == null)
 		joinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
+		else
+			joinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getAlias());
 		// would want a new join operator with the current stuff removed
 		if (joinExp == null) {
 

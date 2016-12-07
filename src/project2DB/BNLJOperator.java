@@ -58,8 +58,11 @@ public class BNLJOperator extends Operator {
 		joinMap = join;
 		rejectedJoins = rejected;
 		this.u = u;
-
+		if(((Table)joinList.get(0).getRightItem()).getAlias()==null)
 		rightExp = soloMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
+		else
+			rightExp = soloMap.get(((Table)joinList.get(0).getRightItem()).getAlias());
+
 		if (rightExp == null){
 			rightOp = new scanOperator(((Table)joinList.get(0).getRightItem()));
 		}
@@ -100,8 +103,11 @@ public class BNLJOperator extends Operator {
 				}
 			}
 		}
-
+		if(((Table)joinList.get(0).getRightItem()).getAlias() ==null)
 		joinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
+		else
+			joinExp = joinMap.get(((Table)joinList.get(0).getRightItem()).getWholeTableName());
+
 		if (joinExp == null) {
 
 			if (!rejectedJoins.isEmpty()) {

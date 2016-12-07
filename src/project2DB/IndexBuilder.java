@@ -21,6 +21,9 @@ public class IndexBuilder {
 	SortOperator tableSorter;
 	ProjectOperator tableProjecter;
 	scanOperator tableScanner;
+	ProjectOperator tableProjecter2;
+	scanOperator tableScanner2;
+	SortOperator tableSorter2;
 	BPlusTree indexTree; 
 	Hashtable<Integer, Integer> totalUnique = new Hashtable<Integer, Integer>();
 	String key;
@@ -41,22 +44,29 @@ public class IndexBuilder {
 		key = table + "." + attribute;
 		this.clustered= clustered;
 		tableSorter = new SortOperator(null, null);
+		tableSorter2= new SortOperator(null, null);
 		Table tableN = new Table("", table);
 		System.out.println(tableN.getWholeTableName());
-		tableProjecter = new ProjectOperator(null, null, tableN);
-		tableScanner = new scanOperator(tableN);
 		
-		tableProjecter.setChild(tableScanner);
-		tableSorter.setChild(tableProjecter);
-		tableSorter.addToSortListActual(key);
-		tableSorter.setupBuffer();
 		if(clustered == 1){
-			System.out.println("am i going to this?");
-			tableSorter.setTupleWriter(new TupleWriter(out));
+			tableProjecter = new ProjectOperator(null, null, tableN);
+			tableScanner = new scanOperator(tableN);
+			tableProjecter.setChild(tableScanner);
+			tableSorter.setChild(tableProjecter);
+			tableSorter.addToSortListActual(key);
+			tableSorter.setupBuffer();
+			System.out.println("am i going to CLUSTERING?");
+			tableSorter.setTupleWriter(new TupleWriter(fileUrl));
 			tableSorter.dump();
 		}
+		tableProjecter2 = new ProjectOperator(null, null, tableN);
+		tableScanner2 = new scanOperator(tableN);
+		tableProjecter2.setChild(tableScanner2);
+		tableSorter2.setChild(tableProjecter2);
+		tableSorter2.addToSortListActual(key);
+		tableSorter2.setupBuffer();
 		
-		tupleBuffer = tableSorter.getBuffer();
+		tupleBuffer = tableSorter2.getBuffer();
 		
 		for(int i =0; i<tupleBuffer.size(); i++)
 		{
